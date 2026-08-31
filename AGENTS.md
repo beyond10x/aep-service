@@ -93,6 +93,14 @@ the Docusaurus site; it is separate because `npm ci` uses the network.
 Cargo gate commands use `--locked`. Read the task's exit status directly. Add a new required check
 to `Taskfile.yml` and CI together so pull requests and releases cannot exercise shorter gates.
 
+## Branch protection
+
+`main` carries the active ruleset `main: checks before merge` (id `21939350`). The `gate` and
+`site` checks are required, deletion and non-fast-forward updates are forbidden, and repository
+administrators plus the `b10x-bot` integration can bypass it for the bot-only direct-push workflow.
+If a job name changes, update the ruleset in the same operation; an obsolete required context
+blocks every pull request without protecting anything.
+
 ## Implementation conventions
 
 - Tests are named for behavior and assert a typed reason, never only `is_err()`.
