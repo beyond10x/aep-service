@@ -4,8 +4,8 @@ version = 4
 
 [[package]]
 name = "aep-backend-entity"
-version = "0.36.3"
-source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.3#83dd04e69881327f1a43a319213c6f254adeba2e"
+version = "0.36.4"
+source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.4#2f15e671222f1e1183465efca0147042da0b54f9"
 dependencies = [
  "aep-backend-memory",
  "aep-contract",
@@ -18,8 +18,8 @@ dependencies = [
 
 [[package]]
 name = "aep-backend-markdown"
-version = "0.36.3"
-source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.3#83dd04e69881327f1a43a319213c6f254adeba2e"
+version = "0.36.4"
+source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.4#2f15e671222f1e1183465efca0147042da0b54f9"
 dependencies = [
  "aep-backend-entity",
  "aep-backend-memory",
@@ -36,8 +36,8 @@ dependencies = [
 
 [[package]]
 name = "aep-backend-memory"
-version = "0.36.3"
-source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.3#83dd04e69881327f1a43a319213c6f254adeba2e"
+version = "0.36.4"
+source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.4#2f15e671222f1e1183465efca0147042da0b54f9"
 dependencies = [
  "aep-contract",
  "aep-domain",
@@ -46,8 +46,8 @@ dependencies = [
 
 [[package]]
 name = "aep-backend-postgres"
-version = "0.36.3"
-source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.3#83dd04e69881327f1a43a319213c6f254adeba2e"
+version = "0.36.4"
+source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.4#2f15e671222f1e1183465efca0147042da0b54f9"
 dependencies = [
  "aep-backend-entity",
  "aep-contract",
@@ -61,8 +61,8 @@ dependencies = [
 
 [[package]]
 name = "aep-client"
-version = "0.36.3"
-source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.3#83dd04e69881327f1a43a319213c6f254adeba2e"
+version = "0.36.4"
+source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.4#2f15e671222f1e1183465efca0147042da0b54f9"
 dependencies = [
  "aep-contract",
  "aep-domain",
@@ -73,8 +73,8 @@ dependencies = [
 
 [[package]]
 name = "aep-contract"
-version = "0.36.3"
-source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.3#83dd04e69881327f1a43a319213c6f254adeba2e"
+version = "0.36.4"
+source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.4#2f15e671222f1e1183465efca0147042da0b54f9"
 dependencies = [
  "aep-domain",
  "schemars",
@@ -84,8 +84,8 @@ dependencies = [
 
 [[package]]
 name = "aep-domain"
-version = "0.36.3"
-source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.3#83dd04e69881327f1a43a319213c6f254adeba2e"
+version = "0.36.4"
+source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.4#2f15e671222f1e1183465efca0147042da0b54f9"
 dependencies = [
  "proptest",
  "schemars",
@@ -96,8 +96,8 @@ dependencies = [
 
 [[package]]
 name = "aep-driver-spec"
-version = "0.36.3"
-source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.3#83dd04e69881327f1a43a319213c6f254adeba2e"
+version = "0.36.4"
+source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.4#2f15e671222f1e1183465efca0147042da0b54f9"
 dependencies = [
  "aep-domain",
  "schemars",
@@ -108,8 +108,8 @@ dependencies = [
 
 [[package]]
 name = "aep-engine"
-version = "0.36.3"
-source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.3#83dd04e69881327f1a43a319213c6f254adeba2e"
+version = "0.36.4"
+source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.4#2f15e671222f1e1183465efca0147042da0b54f9"
 dependencies = [
  "aep-contract",
  "aep-domain",
@@ -119,8 +119,8 @@ dependencies = [
 
 [[package]]
 name = "aep-project"
-version = "0.36.3"
-source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.3#83dd04e69881327f1a43a319213c6f254adeba2e"
+version = "0.36.4"
+source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.4#2f15e671222f1e1183465efca0147042da0b54f9"
 dependencies = [
  "aep-domain",
  "aep-driver-spec",
@@ -134,8 +134,8 @@ dependencies = [
 
 [[package]]
 name = "aep-schema"
-version = "0.36.3"
-source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.3#83dd04e69881327f1a43a319213c6f254adeba2e"
+version = "0.36.4"
+source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.4#2f15e671222f1e1183465efca0147042da0b54f9"
 dependencies = [
  "aep-backend-markdown",
  "aep-domain",
@@ -604,8 +604,8 @@ dependencies = [
 
 [[package]]
 name = "ess-domain"
-version = "0.36.3"
-source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.3#83dd04e69881327f1a43a319213c6f254adeba2e"
+version = "0.36.4"
+source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.4#2f15e671222f1e1183465efca0147042da0b54f9"
 dependencies = [
  "aep-domain",
  "schemars",
@@ -1569,8 +1569,8 @@ checksum = "8df9b6e13f2d32c91b9bd719c00d1958837bc7dec474d94952798cc8e69eeec3"
 
 [[package]]
 name = "trace-domain"
-version = "0.36.3"
-source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.3#83dd04e69881327f1a43a319213c6f254adeba2e"
+version = "0.36.4"
+source = "git+https://github.com/beyond10x/engineering-protocols?tag=0.36.4#2f15e671222f1e1183465efca0147042da0b54f9"
 dependencies = [
  "regex",
  "schemars",
