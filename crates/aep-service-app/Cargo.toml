@@ -8,6 +8,10 @@ license.workspace = true
 repository.workspace = true
 authors.workspace = true
 
+[dependencies]
+aep-contract.workspace = true
+aep-domain.workspace = true
+aep-service-auth = { path = "../aep-service-auth" }
+
 [lints]
 workspace = true
-

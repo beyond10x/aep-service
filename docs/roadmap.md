@@ -13,7 +13,9 @@ Work: `epic:application-service-boundary`.
 
 ## Wave 1 — one transactional authority
 
-Run one company realm and one repository workspace against PostgreSQL. A command is evaluated from
+Run one company tenant with one globally unique planning realm and one repository workspace against
+PostgreSQL. The schema and authorization boundary are realm-scoped from the first deployment, so
+the service is multi-tenant even while the first tenant owns only one realm. A command is evaluated from
 fresh state and commits state, relations, events, audit and idempotency memory atomically. Queries
 come from indexed durable state rather than a process-wide hydrated copy.
 
@@ -59,4 +61,6 @@ Work: the remaining stories in `epic:projections-and-adoption` and `epic:operabl
 
 Company-brain entities may use the same hosting platform only after access control and projection
 isolation are proven. They get a separate definition bundle and storage realm; they are not folded
-into the planning model for graph convenience.
+into the planning model for graph convenience. A tenant may own both realms, but common ownership
+grants no cross-realm read, relation or command path; tenant billing and realm provisioning remain
+control-plane concerns outside the AEP wire.

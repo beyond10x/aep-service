@@ -8,6 +8,13 @@ license.workspace = true
 repository.workspace = true
 authors.workspace = true
 
+[dependencies]
+aep-client.workspace = true
+aep-contract.workspace = true
+aep-domain.workspace = true
+aep-service-app = { path = "../aep-service-app" }
+aep-service-auth = { path = "../aep-service-auth" }
+serde.workspace = true
+
 [lints]
 workspace = true
-

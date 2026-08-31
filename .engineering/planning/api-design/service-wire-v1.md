@@ -2,14 +2,14 @@
 format: aep.planning-md/1
 id: api-design:service-wire-v1
 kind: api-design
-status: draft
+status: approved
 title: AEP service wire v1
 summary: Map the EP-owned wire into verified service context without exposing a raw store.
 relations:
 - designs: story:versioned-command-query-api
 - informed_by: story:trusted-command-context
 - informed_by: story:service-conformance-vectors
-revision: 2
+revision: 8
 ---
 ## Purpose
 
@@ -112,8 +112,19 @@ response status and response bytes.
 ## Review Record — 2026-08-31
 
 The operator decided explicit nullable members, authority-scoped idempotency, entity privacy after
-workspace admission and discovery through negotiation. The EP client-facade choice remains open, so
-this design is still a review artifact rather than an implementation claim.
+workspace admission and discovery through negotiation. The official EP client directly implements
+the semantic command and query traits; an injected transport maps a no-response failure locally to
+`Unavailable` without inventing server response bytes. The five wire review questions are resolved;
+this design is approved and remains distinct from an implementation claim. A tenant is the
+control-plane owner of one or more globally unique realms; realm remains the service data and
+authority boundary, and common tenant ownership grants no cross-realm access.
+
+## EP Handoff State — 2026-08-31
+
+The approved EP implementation added the route the review table omitted: `POST /entities/resolve`
+projects `QueryService::resolve`. `aep-client` now embeds the strict documents, semantic error
+mappings and constructed cases the service adapter will consume. This repository still waits for a
+released EP version before adding the dependency, as its pin rule requires.
 
 ## Deliberately not decided here
 

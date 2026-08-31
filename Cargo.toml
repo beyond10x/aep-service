@@ -15,6 +15,15 @@ license = "Apache-2.0"
 repository = "https://github.com/beyond10x/aep-service"
 authors = ["Beyond10x contributor <1379383+beyond10x@users.noreply.github.com>"]
 
+[workspace.dependencies]
+# EP owns the semantic contract and its verified wire bytes. One exact release keeps every
+# consuming crate on the same coordinated boundary (atlas ADR 0008).
+aep-client = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.35.0" }
+aep-contract = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.35.0" }
+aep-domain = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.35.0" }
+# The HTTP adapter is generic over EP response documents and therefore names Serde's public traits.
+serde = "1.0"
+
 [workspace.lints.rust]
 missing_docs = "warn"
 unsafe_code = "forbid"
@@ -26,4 +35,3 @@ module_name_repetitions = "allow"
 must_use_candidate = "allow"
 missing_errors_doc = "allow"
 missing_panics_doc = "allow"
-

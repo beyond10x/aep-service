@@ -9,12 +9,14 @@ relations:
 - decomposes: epic:identity-and-access
 - serves: vision:O1
 - serves: vision:O2
-revision: 1
+revision: 2
 ---
 ## Context
 
 Repository-local ids such as `story:x` need a stable containing scope before relations can cross
-repositories without collision.
+repositories without collision. A tenant is the control-plane owner of one or more globally unique
+realms; realm is the immutable AEP authority and storage boundary, workspace is the repository or
+project scope inside it, and common tenant ownership creates no cross-realm access.
 
 ## Acceptance
 
