@@ -1,0 +1,24 @@
+[package]
+name = "aep-service"
+description = "Runnable single-realm AEP authority."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+aep-client.workspace = true
+aep-contract.workspace = true
+aep-domain.workspace = true
+aep-project.workspace = true
+aep-service-auth = { path = "../aep-service-auth" }
+aep-service-http = { path = "../aep-service-http" }
+aep-service-postgres = { path = "../aep-service-postgres" }
+axum.workspace = true
+clap.workspace = true
+tokio.workspace = true
+
+[lints]
+workspace = true

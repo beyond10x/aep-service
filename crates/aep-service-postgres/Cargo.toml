@@ -9,14 +9,20 @@ repository.workspace = true
 authors.workspace = true
 
 [dependencies]
+aep-backend-entity.workspace = true
 aep-backend-postgres.workspace = true
-aep-service-app = { path = "../aep-service-app" }
-
-[dev-dependencies]
 aep-contract.workspace = true
 aep-domain.workspace = true
-aep-service-auth = { path = "../aep-service-auth" }
+aep-service-app = { path = "../aep-service-app" }
 entity-postgres.workspace = true
+entity-core.workspace = true
+entity-query.workspace = true
+entity-store.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+aep-service-auth = { path = "../aep-service-auth" }
 postgres.workspace = true
 
 [lints]

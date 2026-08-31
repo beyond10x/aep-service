@@ -7,14 +7,15 @@
 use std::collections::BTreeMap;
 
 use aep_client::wire::{
-    self, AuditQueryV1, CommandRequestV1, EntityQueryV1, Method, ProblemDocumentV1,
-    ProblemMappingV1, RelationQueryV1, Request, ResolveRequestV1, Response, SuccessV1,
-    CONSISTENCY_HEADER, MEDIA_TYPE_V1, SUPPORTED_VERSIONS_HEADER,
+    self, AuditQueryV1, CommandRequestV1, EntityQueryV1, HistoryQueryV2, Method, PageV2,
+    ProblemDocumentV1, ProblemMappingV1, RelationQueryV1, Request, ResolveRequestV1, Response,
+    SuccessV1, CONSISTENCY_HEADER, MEDIA_TYPE_V1, MEDIA_TYPE_V2, SUPPORTED_VERSIONS_HEADER,
 };
 use aep_contract::command::{CommandEnvelope, CommandService};
 use aep_contract::error::{CommandError, QueryError};
-use aep_contract::query::{AuditQuery, EntityQuery, QueryService, RelationQuery};
+use aep_contract::query::{AuditQuery, EntityQuery, HistoryQuery, QueryService, RelationQuery};
 use aep_contract::{ConsistencyToken, QueryConsistency};
+use aep_domain::audit::AuditRecord;
 use aep_domain::command::Command;
 use aep_domain::entity::{EntityId, EntityRef, EntityType};
 use aep_domain::error::{ValidationCode, ValidationError, ValidationErrors};
@@ -32,7 +33,7 @@ pub struct RequestMetadata {
     pub received_at: Timestamp,
 }
 
-/// A runtime- and framework-neutral HTTP adapter for the version-1 AEP service wire.
+/// A runtime- and framework-neutral HTTP adapter for the supported AEP service wires.
 pub struct AepHttpService<V, P> {
     verifier: V,
     services: P,
@@ -55,9 +56,10 @@ impl<V: CredentialVerifier, P: ServiceProvider> AepHttpService<V, P> {
     ///
     /// Credential bytes are borrowed only while calling the verifier and are never retained.
     pub async fn handle(&self, request: Request, metadata: RequestMetadata) -> Response {
-        if !negotiates_v1(&request) {
+        let Some(version) = negotiated_version(&request) else {
             return unsupported_version();
-        }
+        };
+        let media_type = version.media_type();
 
         let (scope, route) = match Route::parse(request.method, &request.path) {
             Ok(route) => route,
@@ -65,6 +67,7 @@ impl<V: CredentialVerifier, P: ServiceProvider> AepHttpService<V, P> {
                 return problem(
                     metadata.request_id,
                     ProblemMappingV1::query(&QueryError::Invalid { reason }),
+                    media_type,
                 );
             }
         };
@@ -79,6 +82,7 @@ impl<V: CredentialVerifier, P: ServiceProvider> AepHttpService<V, P> {
                 return problem(
                     metadata.request_id,
                     ProblemMappingV1::unauthenticated(error.reason()),
+                    media_type,
                 );
             }
         };
@@ -86,6 +90,7 @@ impl<V: CredentialVerifier, P: ServiceProvider> AepHttpService<V, P> {
             return problem(
                 metadata.request_id,
                 ProblemMappingV1::unauthorized("workspace is not granted"),
+                media_type,
             );
         }
 
@@ -95,9 +100,12 @@ impl<V: CredentialVerifier, P: ServiceProvider> AepHttpService<V, P> {
             metadata.request_id.clone(),
             metadata.received_at,
         );
+        if !version.permits(&route) {
+            return unsupported_version();
+        }
         let intent = match Intent::decode(route, &request, &trusted) {
             Ok(intent) => intent,
-            Err(mapping) => return problem(metadata.request_id, mapping),
+            Err(mapping) => return problem(metadata.request_id, mapping, media_type),
         };
         let command_intent = matches!(&intent, Intent::Command(_));
 
@@ -109,6 +117,7 @@ impl<V: CredentialVerifier, P: ServiceProvider> AepHttpService<V, P> {
                     ProblemMappingV1::command(&CommandError::Unavailable {
                         reason: error.reason().to_owned(),
                     }),
+                    media_type,
                 );
             }
             Err(error) => {
@@ -117,46 +126,64 @@ impl<V: CredentialVerifier, P: ServiceProvider> AepHttpService<V, P> {
                     ProblemMappingV1::query(&QueryError::Unavailable {
                         reason: error.reason().to_owned(),
                     }),
+                    media_type,
                 );
             }
         };
 
-        match intent {
-            Intent::Command(envelope) => match service.execute(*envelope).await {
-                Ok(result) => success(metadata.request_id, wire::CommandResultV1::from(result)),
-                Err(error) => problem(metadata.request_id, ProblemMappingV1::command(&error)),
-            },
-            Intent::Get(reference, consistency) => {
-                match service.get(&reference, consistency).await {
-                    Ok(result) => success(metadata.request_id, result),
-                    Err(error) => problem(metadata.request_id, ProblemMappingV1::query(&error)),
-                }
+        dispatch_intent(service, intent, metadata.request_id, media_type).await
+    }
+}
+
+async fn dispatch_intent<S>(
+    service: S,
+    intent: Intent,
+    request_id: RequestId,
+    media_type: &str,
+) -> Response
+where
+    S: CommandService<Command = Command> + QueryService<AuditRecord = AuditRecord>,
+{
+    match intent {
+        Intent::Command(envelope) => match service.execute(*envelope).await {
+            Ok(result) => success(request_id, wire::CommandResultV1::from(result), media_type),
+            Err(error) => problem(request_id, ProblemMappingV1::command(&error), media_type),
+        },
+        Intent::Get(reference, consistency) => match service.get(&reference, consistency).await {
+            Ok(result) => success(request_id, result, media_type),
+            Err(error) => problem(request_id, ProblemMappingV1::query(&error), media_type),
+        },
+        Intent::Resolve(locator) => match service.resolve(&locator).await {
+            Ok(result) => success(request_id, result, media_type),
+            Err(error) => problem(request_id, ProblemMappingV1::query(&error), media_type),
+        },
+        Intent::EntityQuery(query) => match service.query(&query).await {
+            Ok(result) => success(request_id, wire::PageV1::from(result), media_type),
+            Err(error) => problem(request_id, ProblemMappingV1::query(&error), media_type),
+        },
+        Intent::RelationQuery(query) => match service.relations(&query).await {
+            Ok(result) => success(request_id, wire::PageV1::from(result), media_type),
+            Err(error) => problem(request_id, ProblemMappingV1::query(&error), media_type),
+        },
+        Intent::History(reference) => match service.history(&reference).await {
+            Ok(result) => success(request_id, result, media_type),
+            Err(error) => problem(request_id, ProblemMappingV1::query(&error), media_type),
+        },
+        Intent::HistoryPage(mut query) => {
+            query.limit.get_or_insert(100);
+            match service.history_page(&query).await {
+                Ok(result) => success(request_id, PageV2::from(result), media_type),
+                Err(error) => problem(request_id, ProblemMappingV1::query(&error), media_type),
             }
-            Intent::Resolve(locator) => match service.resolve(&locator).await {
-                Ok(result) => success(metadata.request_id, result),
-                Err(error) => problem(metadata.request_id, ProblemMappingV1::query(&error)),
-            },
-            Intent::EntityQuery(query) => match service.query(&query).await {
-                Ok(result) => success(metadata.request_id, wire::PageV1::from(result)),
-                Err(error) => problem(metadata.request_id, ProblemMappingV1::query(&error)),
-            },
-            Intent::RelationQuery(query) => match service.relations(&query).await {
-                Ok(result) => success(metadata.request_id, wire::PageV1::from(result)),
-                Err(error) => problem(metadata.request_id, ProblemMappingV1::query(&error)),
-            },
-            Intent::History(reference) => match service.history(&reference).await {
-                Ok(result) => success(metadata.request_id, result),
-                Err(error) => problem(metadata.request_id, ProblemMappingV1::query(&error)),
-            },
-            Intent::Audit(query) => match service.audit(&query).await {
-                Ok(result) => success(metadata.request_id, wire::PageV1::from(result)),
-                Err(error) => problem(metadata.request_id, ProblemMappingV1::query(&error)),
-            },
-            Intent::DescribeType(entity_type) => match service.describe_type(&entity_type).await {
-                Ok(result) => success(metadata.request_id, result),
-                Err(error) => problem(metadata.request_id, ProblemMappingV1::query(&error)),
-            },
         }
+        Intent::Audit(query) => match service.audit(&query).await {
+            Ok(result) => success(request_id, wire::PageV1::from(result), media_type),
+            Err(error) => problem(request_id, ProblemMappingV1::query(&error), media_type),
+        },
+        Intent::DescribeType(entity_type) => match service.describe_type(&entity_type).await {
+            Ok(result) => success(request_id, result, media_type),
+            Err(error) => problem(request_id, ProblemMappingV1::query(&error), media_type),
+        },
     }
 }
 
@@ -168,6 +195,7 @@ enum Route {
     EntityQuery,
     RelationQuery,
     History(String),
+    HistoryQuery,
     Audit,
     DescribeType(String),
 }
@@ -191,6 +219,7 @@ impl Route {
             (Method::Get, ["entities", entity, "history"]) => {
                 Self::History(decode_segment(entity)?)
             }
+            (Method::Post, ["history", "query"]) => Self::HistoryQuery,
             (Method::Post, ["audit", "query"]) => Self::Audit,
             (Method::Get, ["types", entity_type]) => {
                 Self::DescribeType(decode_segment(entity_type)?)
@@ -208,6 +237,7 @@ enum Intent {
     EntityQuery(EntityQuery),
     RelationQuery(RelationQuery),
     History(EntityRef),
+    HistoryPage(HistoryQuery),
     Audit(AuditQuery),
     DescribeType(EntityType),
 }
@@ -236,6 +266,9 @@ impl Intent {
                 .map(Into::into)
                 .map(Self::RelationQuery),
             Route::History(raw) => entity_reference(&raw).map(Self::History),
+            Route::HistoryQuery => decode_query_body::<HistoryQueryV2>(&request.body)
+                .map(HistoryQuery::from)
+                .map(Self::HistoryPage),
             Route::Audit => decode_query_body::<AuditQueryV1>(&request.body)
                 .map(AuditQuery::from)
                 .map(Self::Audit),
@@ -330,18 +363,42 @@ fn consistency(request: &Request) -> Result<QueryConsistency, ProblemMappingV1> 
     )
 }
 
-fn negotiates_v1(request: &Request) -> bool {
-    let accepts = header(request, "Accept").is_some_and(|value| {
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum WireVersion {
+    V1,
+    V2,
+}
+
+impl WireVersion {
+    const fn media_type(self) -> &'static str {
+        match self {
+            Self::V1 => MEDIA_TYPE_V1,
+            Self::V2 => MEDIA_TYPE_V2,
+        }
+    }
+
+    const fn permits(self, route: &Route) -> bool {
+        matches!((self, route), (Self::V2, Route::HistoryQuery))
+            || matches!(self, Self::V1) && !matches!(route, Route::HistoryQuery)
+    }
+}
+
+fn negotiated_version(request: &Request) -> Option<WireVersion> {
+    let version = header(request, "Accept").and_then(|value| {
         value
             .split(',')
-            .any(|candidate| candidate.trim() == MEDIA_TYPE_V1)
-    });
+            .find_map(|candidate| match candidate.trim() {
+                MEDIA_TYPE_V2 => Some(WireVersion::V2),
+                MEDIA_TYPE_V1 => Some(WireVersion::V1),
+                _ => None,
+            })
+    })?;
     let content_type = if request.method == Method::Post {
-        header(request, "Content-Type") == Some(MEDIA_TYPE_V1)
+        header(request, "Content-Type") == Some(version.media_type())
     } else {
         request.body.is_empty()
     };
-    accepts && content_type
+    content_type.then_some(version)
 }
 
 fn header<'a>(request: &'a Request, name: &str) -> Option<&'a str> {
@@ -396,32 +453,33 @@ fn hex(byte: u8) -> Result<u8, String> {
     }
 }
 
-fn response_headers() -> BTreeMap<String, String> {
+fn response_headers(media_type: &str) -> BTreeMap<String, String> {
     BTreeMap::from([
-        ("Content-Type".to_owned(), MEDIA_TYPE_V1.to_owned()),
+        ("Content-Type".to_owned(), media_type.to_owned()),
         ("Vary".to_owned(), "Accept".to_owned()),
     ])
 }
 
-fn success<T: serde::Serialize>(request_id: RequestId, result: T) -> Response {
-    encoded_response(200, &SuccessV1 { request_id, result })
+fn success<T: serde::Serialize>(request_id: RequestId, result: T, media_type: &str) -> Response {
+    encoded_response(200, &SuccessV1 { request_id, result }, media_type)
 }
 
-fn problem(request_id: RequestId, mapping: ProblemMappingV1) -> Response {
+fn problem(request_id: RequestId, mapping: ProblemMappingV1, media_type: &str) -> Response {
     encoded_response(
         mapping.status,
         &ProblemDocumentV1 {
             request_id,
             error: mapping.problem,
         },
+        media_type,
     )
 }
 
-fn encoded_response<T: serde::Serialize>(status: u16, document: &T) -> Response {
+fn encoded_response<T: serde::Serialize>(status: u16, document: &T, media_type: &str) -> Response {
     match wire::encode(document) {
         Ok(body) => Response {
             status,
-            headers: response_headers(),
+            headers: response_headers(media_type),
             body,
         },
         Err(_) => Response {
@@ -436,7 +494,7 @@ fn unsupported_version() -> Response {
     Response {
         status: 406,
         headers: BTreeMap::from([
-            (SUPPORTED_VERSIONS_HEADER.to_owned(), "1".to_owned()),
+            (SUPPORTED_VERSIONS_HEADER.to_owned(), "1, 2".to_owned()),
             ("Vary".to_owned(), "Accept".to_owned()),
         ]),
         body: Vec::new(),

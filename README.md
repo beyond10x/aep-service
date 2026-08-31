@@ -25,24 +25,47 @@ aep-service
 
 ## Status
 
-The versioned HTTP boundary, trusted request context and realm-scoped transactional PostgreSQL
-authority are implemented as libraries. Each request opens a fresh EP backend; Entity Runtime's
-PostgreSQL provider locks current revisions and atomically commits the complete command batch. No
-server binary is runnable yet, and durable queries still hydrate the realm until the indexed-query
-story replaces that temporary read path. Work is governed in `.engineering/planning/` and ordered
-in [`docs/roadmap.md`](docs/roadmap.md).
+The first central-authority slice is runnable. The service loads and verifies one immutable EP
+definition bundle before becoming reachable, opens a fresh transactional PostgreSQL command session
+for each request, and answers bounded queries through Entity Runtime's durable indexes rather than a
+process-wide realm copy. HTTP wire v1 remains compatible with EP's constructed corpus; wire v2 adds
+bounded cursor-based history. Authentication is deliberately limited to a loopback-only development
+bearer until the identity wave lands. Work is governed in `.engineering/planning/` and ordered in
+[`docs/roadmap.md`](docs/roadmap.md).
 
 ## Workspace
 
 | crate | responsibility |
 |---|---|
+| `aep-service` | runnable HTTP process, startup configuration and graceful shutdown |
 | `aep-service-app` | authenticated command/query orchestration and application policy |
 | `aep-service-auth` | verification of human and delegated-agent identity claims |
 | `aep-service-postgres` | transactional AEP persistence, indexes and definition bundles |
 | `aep-service-http` | versioned HTTP realization of the EP-owned service contract |
 
 These are library boundaries inside one deployable service, not a microservice decomposition. The
-service binary arrives with the HTTP-runtime story once there is an application worth starting.
+binary currently serves one configured realm/workspace authority per process; tenant and realm
+provisioning remain a later control-plane concern.
+
+## Run locally
+
+The development verifier refuses non-loopback listeners. Put the database URL and an exact bearer
+token in environment variables, then name the EP definitions and their pinned digest explicitly:
+
+```console
+export AEP_DATABASE_URL='postgresql://...'
+export AEP_DEV_BEARER_TOKEN='local-secret'
+aep-service serve \
+  --realm company-planning \
+  --workspace aep-service \
+  --schema company_planning \
+  --definitions ../engineering-protocols \
+  --definition-digest <sha256>
+```
+
+`/livez` reports that the process is serving, and `/readyz` exists only after the definition bundle
+has verified and PostgreSQL preparation has succeeded. The development token is an explicit local
+bootstrap seam, not a production authentication mode.
 
 ## Local checks
 

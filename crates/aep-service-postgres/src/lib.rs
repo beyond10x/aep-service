@@ -1,16 +1,31 @@
 //! Transactional PostgreSQL authority for one configured AEP realm and workspace.
 //!
-//! Each request gets a newly opened EP backend over Entity Runtime's PostgreSQL provider. The
-//! backend may hydrate a candidate view in order to apply today's EP contract, but that view is
-//! never retained as service authority: Entity Runtime reads and locks every expected revision in
-//! the committing database transaction. A stale candidate loses with a revision conflict, and the
-//! complete EP batch lands or rolls back together.
+//! Each request gets a composite handle: EP's fresh transactional command session and indexed
+//! query orchestration over Entity Runtime's provider-neutral document query capability. Neither
+//! side hydrates the realm. A command's bounded candidate view and complete atomic batch live in
+//! one outer transaction; a query materializes only the rows its authorized question selects.
 
 use std::fmt;
 use std::future::ready;
 
-use aep_backend_postgres::PostgresBackend;
+use aep_backend_postgres::SessionPostgresBackend;
+use aep_contract::command::{CommandEnvelope, CommandResult, CommandService};
+use aep_contract::error::{CommandError, QueryError};
+use aep_contract::query::{
+    AuditQuery, EntityEnvelope, EntityQuery, HistoryQuery, Page, QueryService, Relation,
+    RelationQuery, RevisionRecord,
+};
+use aep_contract::registry::TypeDescriptor;
+use aep_contract::QueryConsistency;
+use aep_domain::artifact::LifecycleRegistry;
+use aep_domain::audit::AuditRecord;
+use aep_domain::command::Command;
+use aep_domain::entity::{EntityId, EntityLocator, EntityRef, EntityType};
 use aep_service_app::{ServiceBindingError, ServiceProvider, TrustedRequestContext};
+
+mod query;
+
+use query::IndexedPostgresQueries;
 
 /// Configuration rejected before any database connection is attempted.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -49,6 +64,7 @@ pub struct PostgresAuthority {
     realm: String,
     workspace: String,
     schema: String,
+    lifecycles: LifecycleRegistry,
 }
 
 impl fmt::Debug for PostgresAuthority {
@@ -59,6 +75,7 @@ impl fmt::Debug for PostgresAuthority {
             .field("realm", &self.realm)
             .field("workspace", &self.workspace)
             .field("schema", &self.schema)
+            .field("lifecycles", &self.lifecycles.len())
             .finish()
     }
 }
@@ -74,6 +91,7 @@ impl PostgresAuthority {
         realm: impl Into<String>,
         workspace: impl Into<String>,
         schema: impl Into<String>,
+        lifecycles: LifecycleRegistry,
     ) -> Result<Self, AuthorityConfigError> {
         let database_url = database_url.into();
         let realm = realm.into();
@@ -88,6 +106,7 @@ impl PostgresAuthority {
             realm,
             workspace,
             schema,
+            lifecycles,
         })
     }
 
@@ -106,10 +125,19 @@ impl PostgresAuthority {
         &self.schema
     }
 
+    /// Verifies connectivity and prepares the configured schema before readiness is advertised.
+    pub fn prepare(&self) -> Result<(), ServiceBindingError> {
+        entity_postgres::PostgresStore::connect_in_schema(&self.database_url, &self.schema)
+            .map(|_| ())
+            .map_err(|_| {
+                ServiceBindingError::unavailable("the PostgreSQL authority is unavailable")
+            })
+    }
+
     fn bind_now(
         &self,
         context: &TrustedRequestContext,
-    ) -> Result<PostgresBackend, ServiceBindingError> {
+    ) -> Result<ScopedPostgresService, ServiceBindingError> {
         let scope = context.scope();
         if scope.realm() != self.realm || scope.workspace() != self.workspace {
             return Err(ServiceBindingError::unavailable(
@@ -124,14 +152,82 @@ impl PostgresAuthority {
                 "the trusted principal is not admitted to the requested authority",
             ));
         }
-        PostgresBackend::connect_in_schema(&self.database_url, &self.schema).map_err(|_| {
-            ServiceBindingError::unavailable("the PostgreSQL authority is unavailable")
-        })
+        let commands = SessionPostgresBackend::connect_in_schema_with_lifecycles(
+            &self.database_url,
+            &self.schema,
+            self.lifecycles.clone(),
+        )
+        .map_err(|_| ServiceBindingError::unavailable("the PostgreSQL authority is unavailable"))?;
+        let queries = IndexedPostgresQueries::connect_in_schema(
+            &self.database_url,
+            &self.schema,
+            self.lifecycles.clone(),
+        )
+        .map_err(|_| ServiceBindingError::unavailable("the PostgreSQL authority is unavailable"))?;
+        Ok(ScopedPostgresService { commands, queries })
+    }
+}
+
+/// One request-scoped semantic handle over a shared PostgreSQL authority.
+#[derive(Debug)]
+pub struct ScopedPostgresService {
+    commands: SessionPostgresBackend,
+    queries: IndexedPostgresQueries,
+}
+
+impl CommandService for ScopedPostgresService {
+    type Command = Command;
+
+    async fn execute(
+        &self,
+        envelope: CommandEnvelope<Self::Command>,
+    ) -> Result<CommandResult, CommandError> {
+        self.commands.execute(envelope).await
+    }
+}
+
+impl QueryService for ScopedPostgresService {
+    type AuditRecord = AuditRecord;
+
+    async fn get(
+        &self,
+        reference: &EntityRef,
+        consistency: QueryConsistency,
+    ) -> Result<EntityEnvelope, QueryError> {
+        self.queries.get(reference, consistency).await
+    }
+
+    async fn resolve(&self, locator: &EntityLocator) -> Result<EntityId, QueryError> {
+        self.queries.resolve(locator).await
+    }
+
+    async fn query(&self, query: &EntityQuery) -> Result<Page<EntityEnvelope>, QueryError> {
+        self.queries.query(query).await
+    }
+
+    async fn relations(&self, query: &RelationQuery) -> Result<Page<Relation>, QueryError> {
+        self.queries.relations(query).await
+    }
+
+    async fn history(&self, reference: &EntityRef) -> Result<Vec<RevisionRecord>, QueryError> {
+        self.queries.history(reference).await
+    }
+
+    async fn history_page(&self, query: &HistoryQuery) -> Result<Page<RevisionRecord>, QueryError> {
+        self.queries.history_page(query).await
+    }
+
+    async fn audit(&self, query: &AuditQuery) -> Result<Page<Self::AuditRecord>, QueryError> {
+        self.queries.audit(query).await
+    }
+
+    async fn describe_type(&self, entity_type: &EntityType) -> Result<TypeDescriptor, QueryError> {
+        self.queries.describe_type(entity_type).await
     }
 }
 
 impl ServiceProvider for PostgresAuthority {
-    type Service = PostgresBackend;
+    type Service = ScopedPostgresService;
 
     fn bind(
         &self,
@@ -202,16 +298,28 @@ mod tests {
     #[test]
     fn invalid_or_ambiguous_schema_names_are_refused_before_use() {
         for schema in ["", "Upper", "two-realms", "1realm"] {
-            let error = PostgresAuthority::new("postgres://unused", "company", "repo", schema)
-                .expect_err("invalid schema");
+            let error = PostgresAuthority::new(
+                "postgres://unused",
+                "company",
+                "repo",
+                schema,
+                LifecycleRegistry::new(),
+            )
+            .expect_err("invalid schema");
             assert!(
                 error.reason().contains("schema"),
                 "the refusal names the bad coordinate: {error}"
             );
         }
         let too_long = "r".repeat(64);
-        let error = PostgresAuthority::new("postgres://unused", "company", "repo", too_long)
-            .expect_err("truncated schemas are unsafe");
+        let error = PostgresAuthority::new(
+            "postgres://unused",
+            "company",
+            "repo",
+            too_long,
+            LifecycleRegistry::new(),
+        )
+        .expect_err("truncated schemas are unsafe");
         assert_eq!(error.reason(), "the schema must be at most 63 bytes");
     }
 
@@ -222,6 +330,7 @@ mod tests {
             "company",
             "repo",
             "company_planning",
+            LifecycleRegistry::new(),
         )
         .expect("configuration");
 
@@ -240,6 +349,7 @@ mod tests {
             "company",
             "repo",
             "company_planning",
+            LifecycleRegistry::new(),
         )
         .expect("configuration");
 

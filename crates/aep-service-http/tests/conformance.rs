@@ -10,8 +10,8 @@ use aep_client::wire::{self, Request};
 use aep_contract::command::{CommandEnvelope, CommandOutcome, CommandResult, CommandService};
 use aep_contract::error::{CommandError, QueryError};
 use aep_contract::query::{
-    AuditQuery, EntityEnvelope, EntityQuery, Page, QueryService, Relation, RelationQuery,
-    RevisionRecord,
+    AuditQuery, EntityEnvelope, EntityQuery, HistoryQuery, Page, QueryService, Relation,
+    RelationQuery, RevisionRecord,
 };
 use aep_contract::registry::TypeDescriptor;
 use aep_contract::{ConsistencyToken, QueryConsistency};
@@ -88,6 +88,7 @@ struct Observed {
     bindings: Vec<TrustedRequestContext>,
     command_calls: usize,
     entity_query_calls: usize,
+    history_page_calls: usize,
     commands: Vec<CommandEnvelope<Command>>,
 }
 
@@ -203,6 +204,14 @@ impl QueryService for FakeService {
         ready(unexpected_query("history"))
     }
 
+    fn history_page(
+        &self,
+        _query: &HistoryQuery,
+    ) -> impl Future<Output = Result<Page<RevisionRecord>, QueryError>> {
+        self.observed.borrow_mut().history_page_calls += 1;
+        ready(Ok(Page::complete(Vec::new())))
+    }
+
     fn audit(
         &self,
         _query: &AuditQuery,
@@ -238,6 +247,14 @@ fn request_id(name: &str) -> &'static str {
         "workspace-unauthorized-query" => "server-request-query-denied",
         "unsupported-wire-version" => "server-request-version",
         _ => panic!("unknown corpus case {name}"),
+    }
+}
+
+fn supported_versions<'a>(name: &str, corpus: Option<&'a str>) -> Option<&'a str> {
+    if name == "unsupported-wire-version" {
+        Some("1, 2")
+    } else {
+        corpus
     }
 }
 
@@ -288,7 +305,7 @@ fn the_service_answers_every_ep_owned_exchange_byte_for_byte_and_dispatches_only
         );
         assert_eq!(
             response.header(wire::SUPPORTED_VERSIONS_HEADER),
-            case.response.supported_versions,
+            supported_versions(case.name, case.response.supported_versions),
             "{} supported versions",
             case.name
         );
@@ -343,6 +360,66 @@ fn the_service_answers_every_ep_owned_exchange_byte_for_byte_and_dispatches_only
             );
         }
     }
+}
+
+#[test]
+fn bounded_history_version_two_selects_its_strict_documents_and_dispatches_one_page() {
+    let observed = Rc::new(RefCell::new(Observed::default()));
+    let adapter = AepHttpService::new(
+        CorpusVerifier {
+            outcome: VerifierOutcome::Verified(Principal {
+                authority: "human:alice",
+                executor: None,
+                realm: "company",
+                workspace_grants: &["repo"],
+                roles: &["engineer"],
+                delegation_id: None,
+            }),
+        },
+        FakeProvider {
+            service: FakeService {
+                mode: Mode::Query,
+                observed: Rc::clone(&observed),
+            },
+        },
+    );
+    let query = wire::HistoryQueryV2 {
+        entity: EntityRef::new("01HISTORY00000000000000001".parse().expect("entity")),
+        limit: wire::Nullable::new(Some(25)),
+        after: wire::Nullable::new(None),
+        consistency: QueryConsistency::Current,
+    };
+    let response = aep_contract::testing::block_on(adapter.handle(
+        Request {
+            method: wire::Method::Post,
+            path: "/aep/v1/realms/company/workspaces/repo/history/query".to_owned(),
+            headers: BTreeMap::from([
+                ("Accept".to_owned(), wire::MEDIA_TYPE_V2.to_owned()),
+                ("Content-Type".to_owned(), wire::MEDIA_TYPE_V2.to_owned()),
+                ("Authorization".to_owned(), "Bearer synthetic".to_owned()),
+            ]),
+            body: wire::encode(&query).expect("request bytes"),
+        },
+        RequestMetadata {
+            request_id: "server-request-history".parse().expect("request id"),
+            received_at: aep_domain::time::Timestamp::from_epoch_millis(1_800_000_000_000),
+        },
+    ));
+
+    assert_eq!(response.status, 200);
+    assert_eq!(response.header("Content-Type"), Some(wire::MEDIA_TYPE_V2));
+    let expected = wire::SuccessV1 {
+        request_id: "server-request-history".parse().expect("request id"),
+        result: wire::PageV2::<RevisionRecord> {
+            items: Vec::new(),
+            next: wire::Nullable::new(None),
+        },
+    };
+    assert_eq!(
+        response.body,
+        wire::encode(&expected).expect("response bytes")
+    );
+    assert_eq!(observed.borrow().history_page_calls, 1);
 }
 
 #[test]

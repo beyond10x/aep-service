@@ -5,18 +5,19 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use aep_contract::command::{CommandContext, CommandEnvelope, CommandService};
 use aep_contract::error::CommandError;
-use aep_contract::query::{QueryService, RelationQuery};
+use aep_contract::query::{AuditQuery, EntityQuery, HistoryQuery, QueryService, RelationQuery};
 use aep_contract::testing::block_on;
 use aep_contract::QueryConsistency;
-use aep_domain::artifact::RelationKind;
+use aep_domain::artifact::{LifecycleRegistry, RelationKind};
 use aep_domain::command::{Command, CreateEntity, CreateRelation, UpdateEntity};
-use aep_domain::entity::{ActorRef, EntityId, EntityLocator, EntityRef, EntityType};
+use aep_domain::entity::{
+    ActorRef, EntityId, EntityLocator, EntityRef, EntityRevision, EntityType,
+};
 use aep_domain::node::Node;
 use aep_domain::time::Timestamp;
 use aep_service_app::{ServiceProvider, ServiceScope, TrustedRequestContext};
 use aep_service_auth::VerifiedPrincipal;
 use aep_service_postgres::PostgresAuthority;
-use entity_postgres::PostgresStore;
 use postgres::{Client, NoTls};
 
 static SCHEMAS: AtomicUsize = AtomicUsize::new(0);
@@ -57,16 +58,22 @@ impl TestSchema {
 
 impl Drop for TestSchema {
     fn drop(&mut self) {
-        let Ok(mut store) = PostgresStore::connect(&self.url) else {
+        let Ok(mut client) = Client::connect(&self.url, NoTls) else {
             return;
         };
-        let _ = store.drop_schema(&self.name);
+        let _ = client.batch_execute(&format!("DROP SCHEMA IF EXISTS {} CASCADE", self.name));
     }
 }
 
 fn authority(url: &str, schema: &str) -> PostgresAuthority {
-    PostgresAuthority::new(url, "company-planning", "aep-service", schema)
-        .expect("valid authority configuration")
+    PostgresAuthority::new(
+        url,
+        "company-planning",
+        "aep-service",
+        schema,
+        LifecycleRegistry::new(),
+    )
+    .expect("valid authority configuration")
 }
 
 fn trusted() -> TrustedRequestContext {
@@ -191,7 +198,9 @@ fn a_failure_after_state_relation_event_and_audit_writes_rolls_the_whole_command
     let error = block_on(service.execute(envelope(relation, 3, "alice")))
         .expect_err("injected final-record failure refuses the command");
     assert!(
-        matches!(error, CommandError::Conflict { ref reason } if reason.contains("atomic command")),
+        matches!(error, CommandError::Conflict { ref reason }
+            if reason.contains("database refused the command session")
+                && reason.contains("writing the instance")),
         "the provider failure remains a named command refusal: {error}"
     );
 
@@ -203,11 +212,6 @@ fn a_failure_after_state_relation_event_and_audit_writes_rolls_the_whole_command
         count(&mut client, "events", None),
     ];
     assert_eq!(after, before, "no prefix of the failed command is visible");
-    assert!(
-        service.latched().is_none(),
-        "detached state was not published"
-    );
-
     client
         .batch_execute("DROP TRIGGER fail_applied_command ON instances")
         .expect("failure trigger removed");
@@ -231,9 +235,22 @@ fn two_fresh_service_handles_cannot_silently_overwrite_one_revision() {
     let first = block_on(authority.bind(&trusted())).expect("first fresh handle");
     let second = block_on(authority.bind(&trusted())).expect("second fresh handle");
     let (a, b) = std::thread::scope(|scope| {
-        let a =
-            scope.spawn(|| block_on(first.execute(envelope(retitle(&id, "A won"), 2, "alice"))));
-        let b = scope.spawn(|| block_on(second.execute(envelope(retitle(&id, "B won"), 2, "bob"))));
+        let a = scope.spawn(|| {
+            block_on(
+                first.execute(
+                    envelope(retitle(&id, "A won"), 2, "alice")
+                        .expecting(EntityRevision::new(1).expect("created revision")),
+                ),
+            )
+        });
+        let b = scope.spawn(|| {
+            block_on(
+                second.execute(
+                    envelope(retitle(&id, "B won"), 2, "bob")
+                        .expecting(EntityRevision::new(1).expect("created revision")),
+                ),
+            )
+        });
         (a.join().expect("writer a"), b.join().expect("writer b"))
     });
     let outcomes = [a, b];
@@ -245,10 +262,16 @@ fn two_fresh_service_handles_cannot_silently_overwrite_one_revision() {
     let refusal = outcomes
         .iter()
         .find_map(|outcome| outcome.as_ref().err())
-        .expect("one writer refused")
-        .to_string();
+        .expect("one writer refused");
     assert!(
-        refusal.contains("expected revision 1") && refusal.contains("found revision 2"),
+        matches!(
+            refusal,
+            CommandError::RevisionConflict {
+                expected,
+                actual,
+                ..
+            } if expected.get() == 1 && actual.get() == 2
+        ),
         "the loser is told which durable revision won: {refusal}"
     );
 
@@ -256,4 +279,67 @@ fn two_fresh_service_handles_cannot_silently_overwrite_one_revision() {
     let held = block_on(reader.get(&EntityRef::new(id), QueryConsistency::Current))
         .expect("winner visible");
     assert_eq!(held.metadata.revision.get(), 2, "one update landed");
+}
+
+#[test]
+fn indexed_queries_page_current_rows_history_relations_and_audit_without_realm_hydration() {
+    let Some(url) = url() else { return };
+    let test_schema = TestSchema::new(&url, "indexed");
+    let authority = authority(&url, &test_schema.name);
+    let service = block_on(authority.bind(&trusted())).expect("authority opens");
+
+    let first = block_on(service.execute(envelope(create("first"), 1, "alice")))
+        .expect("first entity created");
+    let first_id = first.affected[0].id.clone();
+    let second_id = block_on(service.execute(envelope(create("second"), 2, "alice")))
+        .expect("second entity created")
+        .affected[0]
+        .id
+        .clone();
+    block_on(service.execute(envelope(retitle(&first_id, "first revised"), 3, "alice")))
+        .expect("first entity revised");
+    block_on(service.execute(envelope(
+        Command::CreateRelation(CreateRelation {
+            kind: RelationKind::Decomposes,
+            source: EntityRef::new(first_id.clone()),
+            target: EntityRef::new(second_id),
+        }),
+        4,
+        "alice",
+    )))
+    .expect("relation created");
+
+    let held = block_on(service.get(
+        &EntityRef::new(first_id.clone()),
+        QueryConsistency::at_least(first.consistency),
+    ))
+    .expect("the command token is already visible on the primary authority");
+    assert_eq!(held.metadata.revision.get(), 2);
+
+    let mut entities = EntityQuery::of_type(EntityType::parse("aep.story/v1").expect("type"));
+    entities.limit = Some(1);
+    let first_page = block_on(service.query(&entities)).expect("first entity page");
+    assert_eq!(first_page.items.len(), 1);
+    entities.after = first_page.next;
+    let second_page = block_on(service.query(&entities)).expect("second entity page");
+    assert_eq!(second_page.items.len(), 1);
+    assert_ne!(
+        first_page.items[0].metadata.id,
+        second_page.items[0].metadata.id
+    );
+
+    let relations =
+        block_on(service.relations(&RelationQuery::from(EntityRef::new(first_id.clone()))))
+            .expect("indexed outgoing relations");
+    assert_eq!(relations.items.len(), 1);
+
+    let mut history = HistoryQuery::for_entity(EntityRef::new(first_id.clone()));
+    history.limit = Some(1);
+    let revisions = block_on(service.history_page(&history)).expect("first history page");
+    assert_eq!(revisions.items.len(), 1);
+    assert!(revisions.next.is_some(), "the update is on the next page");
+
+    let audit = block_on(service.audit(&AuditQuery::for_entity(EntityRef::new(first_id))))
+        .expect("indexed audit records");
+    assert!(!audit.items.is_empty());
 }
