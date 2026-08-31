@@ -9,7 +9,7 @@ relations:
 - designs: story:versioned-command-query-api
 - informed_by: story:trusted-command-context
 - informed_by: story:service-conformance-vectors
-revision: 1
+revision: 2
 ---
 ## Purpose
 
@@ -62,7 +62,12 @@ change lands as a new EP-owned version with pinned constructed conformance vecto
 Atlas decision before this service serves it.
 
 The server may serve two versions during a migration. Internally, each accepted version is adapted
-to the same semantic `CommandService` and `QueryService` contracts.
+to the same semantic `CommandService` and `QueryService` contracts. There is no discovery endpoint:
+failed negotiation advertises the served set through `AEP-Supported-Versions`, and successful
+responses identify the selected version through their media type.
+
+Every nullable version-1 request member is mandatory and is explicitly `null` when absent. A missing
+member is malformed rather than a second spelling for the same request.
 
 ## Error boundary
 
@@ -70,7 +75,8 @@ Transport and application failures remain distinguishable:
 
 - malformed or unsupported wire documents never reach the application service;
 - missing or invalid credentials are unauthenticated;
-- insufficient effective grants are unauthorized;
+- insufficient workspace grants are unauthorized;
+- after workspace admission, absent and entity-level-denied targets are both not found;
 - semantic refusals preserve the stable EP command/query error code;
 - optimistic concurrency remains a typed conflict;
 - unavailable means a retry of unchanged intent may succeed later.
@@ -78,6 +84,12 @@ Transport and application failures remain distinguishable:
 Error bodies contain stable codes and safe structured details. They do not expose token contents,
 database errors, hidden entity data or whether an entity exists outside the caller's authorized
 scope.
+
+## Idempotency
+
+Realm, workspace and authority scope an idempotency key. A different executor acting under the same
+still-valid authority may retrieve the original result; the replay attempt remains separately
+attributable. Reusing a key for different intent is a conflict.
 
 ## Conformance seam
 
@@ -96,6 +108,12 @@ what was handed to the semantic service. The minimum corpus covers:
 
 Every vector pins request bytes, verified principal input, expected semantic call or non-dispatch,
 response status and response bytes.
+
+## Review Record — 2026-08-31
+
+The operator decided explicit nullable members, authority-scoped idempotency, entity privacy after
+workspace admission and discovery through negotiation. The EP client-facade choice remains open, so
+this design is still a review artifact rather than an implementation claim.
 
 ## Deliberately not decided here
 
