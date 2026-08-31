@@ -25,9 +25,12 @@ aep-service
 
 ## Status
 
-Planning scaffold. The workspace establishes the intended component boundaries and compiles, but no
-server is runnable yet. The work is governed in `.engineering/planning/` and ordered in
-[`docs/roadmap.md`](docs/roadmap.md).
+The versioned HTTP boundary, trusted request context and realm-scoped transactional PostgreSQL
+authority are implemented as libraries. Each request opens a fresh EP backend; Entity Runtime's
+PostgreSQL provider locks current revisions and atomically commits the complete command batch. No
+server binary is runnable yet, and durable queries still hydrate the realm until the indexed-query
+story replaces that temporary read path. Work is governed in `.engineering/planning/` and ordered
+in [`docs/roadmap.md`](docs/roadmap.md).
 
 ## Workspace
 
@@ -47,5 +50,7 @@ service binary arrives with the HTTP-runtime story once there is an application 
 task check
 ```
 
-No credential, token, company data or production configuration belongs in this repository.
+Set `ENTITY_POSTGRES_URL` to make the gate run the injected-failure and competing-writer cases
+against PostgreSQL. When it is unset, the gate prints that those cases were skipped.
 
+No credential, token, company data or production configuration belongs in this repository.

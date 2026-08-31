@@ -2,13 +2,13 @@
 format: aep.planning-md/1
 id: epic:transactional-authority
 kind: epic
-status: draft
+status: active
 title: PostgreSQL is one transactional authority
 summary: Evaluate from current durable state and atomically persist every effect of an accepted or refused command.
 relations:
 - decomposes: initiative:central-aep-authority
 - serves: vision:O2
-revision: 1
+revision: 3
 ---
 # Epic: PostgreSQL is one transactional authority
 

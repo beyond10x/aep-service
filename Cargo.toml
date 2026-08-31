@@ -19,8 +19,15 @@ authors = ["Beyond10x contributor <1379383+beyond10x@users.noreply.github.com>"]
 # EP owns the semantic contract and its verified wire bytes. One exact release keeps every
 # consuming crate on the same coordinated boundary (atlas ADR 0008).
 aep-client = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.35.0" }
+aep-backend-postgres = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.35.0" }
 aep-contract = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.35.0" }
 aep-domain = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.35.0" }
+# The service uses the same released provider EP 0.35.0 was verified against. Declaring the pin
+# once here prevents a crate-local ER selection from introducing a second provider generation.
+entity-postgres = { git = "https://github.com/beyond10x/entity-runtime", tag = "0.14.0" }
+# Integration tests install a deliberately failing database trigger and inspect the transaction
+# afterward. Production persistence remains the Entity Runtime provider above.
+postgres = { version = "0.19", default-features = false }
 # The HTTP adapter is generic over EP response documents and therefore names Serde's public traits.
 serde = "1.0"
 

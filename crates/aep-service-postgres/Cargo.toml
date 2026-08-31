@@ -8,6 +8,16 @@ license.workspace = true
 repository.workspace = true
 authors.workspace = true
 
+[dependencies]
+aep-backend-postgres.workspace = true
+aep-service-app = { path = "../aep-service-app" }
+
+[dev-dependencies]
+aep-contract.workspace = true
+aep-domain.workspace = true
+aep-service-auth = { path = "../aep-service-auth" }
+entity-postgres.workspace = true
+postgres.workspace = true
+
 [lints]
 workspace = true
-
