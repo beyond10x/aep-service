@@ -1,0 +1,32 @@
+{
+  "name": "aep-service-website",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "docusaurus build",
+    "start": "docusaurus start",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@docusaurus/core": "3.10.2",
+    "@docusaurus/faster": "3.10.2",
+    "@docusaurus/preset-classic": "3.10.2",
+    "@mdx-js/react": "3.1.1",
+    "clsx": "2.1.1",
+    "prism-react-renderer": "2.4.1",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@docusaurus/tsconfig": "3.10.2",
+    "@docusaurus/types": "3.10.2",
+    "typescript": "6.0.2"
+  },
+  "overrides": {
+    "serialize-javascript": "7.1.1",
+    "uuid": "11.1.1"
+  },
+  "engines": {
+    "node": ">=20.0"
+  }
+}

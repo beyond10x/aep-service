@@ -3,4 +3,7 @@
 .env.*
 *.pem
 *.key
-
+/website/node_modules/
+/website/build/
+/website/.docusaurus/
+/website/static/openapi.json

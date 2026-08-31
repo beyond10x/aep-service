@@ -15,10 +15,12 @@ aep-domain.workspace = true
 aep-project.workspace = true
 aep-service-auth = { path = "../aep-service-auth" }
 aep-service-http = { path = "../aep-service-http" }
+aep-service-openapi = { path = "../aep-service-openapi" }
 aep-service-postgres = { path = "../aep-service-postgres" }
 axum.workspace = true
 clap.workspace = true
 tokio.workspace = true
+uuid.workspace = true
 
 [lints]
 workspace = true

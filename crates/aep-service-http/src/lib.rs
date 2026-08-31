@@ -135,6 +135,30 @@ impl<V: CredentialVerifier, P: ServiceProvider> AepHttpService<V, P> {
     }
 }
 
+/// Builds the same typed unavailable document used by semantic dispatch for listener-level limits.
+pub fn unavailable_response(
+    request_id: RequestId,
+    reason: impl Into<String>,
+    media_type: &str,
+) -> Response {
+    problem(
+        request_id,
+        ProblemMappingV1::query(&QueryError::Unavailable {
+            reason: reason.into(),
+        }),
+        media_type,
+    )
+}
+
+/// Selects the newest supported media type explicitly requested by an `Accept` header.
+pub fn response_media_type(accept: Option<&str>) -> &'static str {
+    if accept.is_some_and(|value| value.split(',').any(|item| item.trim() == MEDIA_TYPE_V2)) {
+        MEDIA_TYPE_V2
+    } else {
+        MEDIA_TYPE_V1
+    }
+}
+
 async fn dispatch_intent<S>(
     service: S,
     intent: Intent,
@@ -227,6 +251,21 @@ impl Route {
             _ => return Err("the method and path do not name a version-1 AEP operation".to_owned()),
         };
         Ok((ServiceScope::new(realm, workspace), route))
+    }
+
+    #[cfg(test)]
+    const fn operation(&self) -> wire::Operation {
+        match self {
+            Self::Command => wire::Operation::Command,
+            Self::GetEntity(_) => wire::Operation::GetEntity,
+            Self::Resolve => wire::Operation::ResolveEntity,
+            Self::EntityQuery => wire::Operation::QueryEntities,
+            Self::RelationQuery => wire::Operation::QueryRelations,
+            Self::History(_) => wire::Operation::GetHistory,
+            Self::HistoryQuery => wire::Operation::QueryHistory,
+            Self::Audit => wire::Operation::QueryAudit,
+            Self::DescribeType(_) => wire::Operation::DescribeType,
+        }
     }
 }
 
@@ -455,8 +494,10 @@ fn hex(byte: u8) -> Result<u8, String> {
 
 fn response_headers(media_type: &str) -> BTreeMap<String, String> {
     BTreeMap::from([
+        ("Cache-Control".to_owned(), "no-store".to_owned()),
         ("Content-Type".to_owned(), media_type.to_owned()),
         ("Vary".to_owned(), "Accept".to_owned()),
+        ("X-Content-Type-Options".to_owned(), "nosniff".to_owned()),
     ])
 }
 
@@ -561,5 +602,35 @@ mod tests {
         ));
         assert!(Route::parse(Method::Get, &format!("{base}/commands")).is_err());
         assert!(Route::parse(Method::Post, &format!("{base}/raw-store")).is_err());
+    }
+
+    #[test]
+    fn every_ep_contract_route_is_recognized_as_the_same_operation() {
+        for specification in wire::ROUTES {
+            let path = specification
+                .path()
+                .replace("{realm}", "company")
+                .replace("{workspace}", "repo")
+                .replace("{entity}", "01K2R8JD3ZJME72AJGQY67E5F8")
+                .replace("{entity_type}", "aep.design%2Fv1");
+            let (_, parsed) = Route::parse(specification.method, &path).expect("contract route");
+            assert_eq!(parsed.operation(), specification.operation);
+        }
+    }
+
+    #[test]
+    fn listener_overload_is_a_typed_retryable_problem_with_security_headers() {
+        let response = unavailable_response(
+            "request-overload".parse().unwrap(),
+            "queue is full",
+            MEDIA_TYPE_V1,
+        );
+        let document: ProblemDocumentV1 = wire::decode(&response.body).unwrap();
+        assert_eq!(response.status, 503);
+        assert_eq!(document.error.code, "unavailable");
+        assert!(document.error.retryable);
+        assert_eq!(response.header("Cache-Control"), Some("no-store"));
+        assert_eq!(response.header("X-Content-Type-Options"), Some("nosniff"));
+        assert_eq!(response.header("Access-Control-Allow-Origin"), None);
     }
 }

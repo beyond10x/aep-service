@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: aep
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d aep"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    volumes:
+      - aep-postgres:/var/lib/postgresql/data
+
+  aep-service:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AEP_DATABASE_URL: postgresql://postgres:postgres@postgres:5432/aep
+      AEP_DEV_BEARER_TOKEN: ${AEP_DEV_BEARER_TOKEN:?set a local-only preview token}
+    command:
+      - serve
+      - --bind
+      - 0.0.0.0:8080
+      - --allow-insecure-dev-listener
+      - --realm
+      - ${AEP_REALM:-company-planning}
+      - --workspace
+      - ${AEP_WORKSPACE:-preview}
+      - --schema
+      - ${AEP_SCHEMA:-company_planning}
+      - --definitions
+      - /definitions
+      - --definition-digest
+      - ${AEP_DEFINITION_DIGEST:?set AEP_DEFINITION_DIGEST to the mounted EP tree digest}
+    healthcheck:
+      test: ["CMD", "aep-service", "probe", "--address", "127.0.0.1:8080", "--readiness"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      - 127.0.0.1:8080:8080
+    volumes:
+      - ../engineering-protocols:/definitions:ro
+
+volumes:
+  aep-postgres:

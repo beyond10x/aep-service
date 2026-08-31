@@ -1,0 +1,39 @@
+:root {
+  --ifm-color-primary: #5b4ae8;
+  --ifm-color-primary-dark: #4937e2;
+  --ifm-color-primary-darker: #402ede;
+  --ifm-color-primary-darkest: #2f20bb;
+  --ifm-color-primary-light: #6d5efc;
+  --ifm-color-primary-lighter: #7a6cff;
+  --ifm-color-primary-lightest: #a69eff;
+  --ifm-code-font-size: 92%;
+}
+
+[data-theme='dark'] {
+  --ifm-background-color: #11121a;
+  --ifm-background-surface-color: #181a25;
+  --ifm-color-primary: #9b91ff;
+}
+
+.hero--primary {
+  background: radial-gradient(circle at 20% 20%, #5b4ae8 0, #24213f 48%, #11121a 100%);
+  color: white;
+}
+
+.api-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.api-card {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.api-method {
+  color: var(--ifm-color-primary);
+  font-weight: 700;
+  margin-right: 0.6rem;
+}

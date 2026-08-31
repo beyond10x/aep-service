@@ -1,79 +1,93 @@
 # aep-service
 
-The authenticated central authority for Agentic Engineering Protocol entities. It accepts semantic
-AEP commands and queries, derives trusted actor/executor attribution from authenticated requests,
-evaluates authorization and protocol rules, and persists the resulting state, history and refusals
-transactionally through Entity Runtime providers.
+`aep-service` is the central, PostgreSQL-backed authority for Agentic Engineering Protocol (AEP)
+entities. Humans and agents submit semantic commands and queries; the service derives trusted
+attribution, applies authorization and protocol rules independently, and commits state, history,
+events, relations, idempotency records, and refusals atomically.
 
-The service is deliberately headless. `engineering-protocols` owns the AEP vocabulary, wire
-contract, official client and `protocol` CLI; `entity-runtime` owns deterministic entity execution
-and generic stores. This repository owns the deployed application between those contracts and
-PostgreSQL.
+This is a developer preview. The data and service boundaries are implemented, but production SSO
+and delegated-agent token verification are deliberately not: the current development verifier uses
+one exact bearer token and is loopback-only unless an operator opts into an insecure listener.
 
-```text
-protocol CLI
-    |
-    | authenticated AEP commands and queries
-    v
-aep-service
-    |-- trusted identity and delegated-agent authorization
-    |-- EP command/query evaluation
-    |-- definition bundle selection
-    |-- authorized snapshot export
-    `-- Entity Runtime providers --> PostgreSQL
+## Where it fits
+
+- [Engineering Protocols](https://github.com/beyond10x/engineering-protocols) owns AEP entity
+  vocabulary, semantic command/query traits, strict wire documents, the official client, and the
+  `protocol` CLI.
+- [Entity Runtime](https://github.com/beyond10x/entity-runtime) owns deterministic entity execution
+  and generic persistence/query providers.
+- This repository owns the deployable application: trust-boundary orchestration, the HTTP adapter,
+  PostgreSQL authority, operational limits, and deployment artifacts.
+
+It is not a generic Entity Runtime store API and not a Jira-style product UI. Markdown remains a
+deterministic projection for review or local use, never a second authoritative write path.
+
+## Try the public surface
+
+Generate the same OpenAPI document served at `/openapi.json`:
+
+```console
+cargo run --locked -p aep-service -- openapi > openapi.json
 ```
 
-## Status
+Validate the immutable EP definitions and capture the digest the service will pin:
 
-The first central-authority slice is runnable. The service loads and verifies one immutable EP
-definition bundle before becoming reachable, opens a fresh transactional PostgreSQL command session
-for each request, and answers bounded queries through Entity Runtime's durable indexes rather than a
-process-wide realm copy. HTTP wire v1 remains compatible with EP's constructed corpus; wire v2 adds
-bounded cursor-based history. Authentication is deliberately limited to a loopback-only development
-bearer until the identity wave lands. Work is governed in `.engineering/planning/` and ordered in
-[`docs/roadmap.md`](docs/roadmap.md).
+```console
+export AEP_DEFINITION_DIGEST="$(cargo run --quiet --locked -p aep-service -- \
+  definitions digest --path ../engineering-protocols)"
+```
+
+Then provide PostgreSQL and start the authority:
+
+```console
+export AEP_DATABASE_URL='postgresql://postgres:postgres@127.0.0.1:5432/aep'
+export AEP_DEV_BEARER_TOKEN='replace-this-local-token'
+
+cargo run --locked -p aep-service -- serve \
+  --realm company-planning \
+  --workspace example-repository \
+  --schema company_planning \
+  --definitions ../engineering-protocols \
+  --definition-digest "$AEP_DEFINITION_DIGEST"
+```
+
+The process binds `127.0.0.1:8080` by default. `/livez` reports process liveness, `/readyz` is
+available only after definitions and PostgreSQL have been prepared, and the binary can probe either:
+
+```console
+cargo run --locked -p aep-service -- probe
+cargo run --locked -p aep-service -- probe --readiness
+```
+
+`--allow-insecure-dev-listener` is required to expose the development verifier beyond loopback and
+prints a warning. It is suitable only for isolated preview environments behind another trusted
+boundary.
 
 ## Workspace
 
 | crate | responsibility |
 |---|---|
-| `aep-service` | runnable HTTP process, startup configuration and graceful shutdown |
-| `aep-service-app` | authenticated command/query orchestration and application policy |
-| `aep-service-auth` | verification of human and delegated-agent identity claims |
-| `aep-service-postgres` | transactional AEP persistence, indexes and definition bundles |
-| `aep-service-http` | versioned HTTP realization of the EP-owned service contract |
+| `aep-service` | process configuration, listener, limits, probes, shutdown |
+| `aep-service-app` | authenticated command/query orchestration |
+| `aep-service-auth` | verified human and delegated-agent principal model |
+| `aep-service-http` | HTTP realization of the EP-owned contract |
+| `aep-service-openapi` | deterministic OpenAPI projection from EP routes and DTO schemas |
+| `aep-service-postgres` | fresh transactional command sessions and indexed queries |
 
-These are library boundaries inside one deployable service, not a microservice decomposition. The
-binary currently serves one configured realm/workspace authority per process; tenant and realm
-provisioning remain a later control-plane concern.
+These are boundaries inside one deployable service, not a microservice decomposition.
 
-## Run locally
+## Development
 
-The development verifier refuses non-loopback listeners. Put the database URL and an exact bearer
-token in environment variables, then name the EP definitions and their pinned digest explicitly:
-
-```console
-export AEP_DATABASE_URL='postgresql://...'
-export AEP_DEV_BEARER_TOKEN='local-secret'
-aep-service serve \
-  --realm company-planning \
-  --workspace aep-service \
-  --schema company_planning \
-  --definitions ../engineering-protocols \
-  --definition-digest <sha256>
-```
-
-`/livez` reports that the process is serving, and `/readyz` exists only after the definition bundle
-has verified and PostgreSQL preparation has succeeded. The development token is an explicit local
-bootstrap seam, not a production authentication mode.
-
-## Local checks
+Rust 1.85 or newer, `go-task`, `protocol`, and Node.js 20 are required for the complete gate.
 
 ```console
 task check
+task site-build
 ```
 
-Set `ENTITY_POSTGRES_URL` to make the gate run the injected-failure and competing-writer cases
-against PostgreSQL. When it is unset, the gate prints that those cases were skipped.
+Set `ENTITY_POSTGRES_URL` to exercise the real-PostgreSQL injected-failure and competing-writer
+tests locally. CI always supplies PostgreSQL. See [CONTRIBUTING.md](CONTRIBUTING.md),
+[SECURITY.md](SECURITY.md), and the [public documentation](https://beyond10x.github.io/aep-service/).
 
-No credential, token, company data or production configuration belongs in this repository.
+Apache-2.0 licensed. No credential, company data, private transcript, or production configuration
+belongs in this repository.

@@ -22,6 +22,15 @@ come from indexed durable state rather than a process-wide hydrated copy.
 Work: `epic:transactional-authority`, with the minimum runtime slice of
 `epic:operable-service`.
 
+## Developer preview — make the implemented boundary adoptable
+
+Publish self-contained human and agent contracts, a deterministic OpenAPI projection, a hardened
+loopback-first process, a local PostgreSQL bundle, public documentation, CI policy, release binaries
+and a non-root OCI image. The preview deliberately keeps the fixed development verifier visible as
+unfinished; it does not imply production identity or general availability.
+
+Work: `epic:public-developer-preview`.
+
 ## Wave 2 — trusted people and agents
 
 Verify the assumed human and delegated-agent tokens, derive actor and executor server-side, enforce

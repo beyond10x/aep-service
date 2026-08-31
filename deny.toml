@@ -1,0 +1,35 @@
+[graph]
+all-features = true
+
+[advisories]
+version = 2
+yanked = "deny"
+
+[licenses]
+version = 2
+confidence-threshold = 0.93
+allow = [
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "BSL-1.0",
+  "MIT",
+  "Unicode-3.0",
+  "Zlib",
+]
+
+[bans]
+multiple-versions = "allow"
+# Cargo-deny classifies workspace and path dependencies as wildcards after synthesizing manifests
+# for the two pinned git workspaces. Exact git tags and one root declaration enforce those edges.
+wildcards = "allow"
+highlight = "all"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-git = [
+  "https://github.com/beyond10x/engineering-protocols",
+  "https://github.com/beyond10x/entity-runtime",
+]

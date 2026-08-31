@@ -7,12 +7,14 @@ tasks:
     deps: [check]
 
   check:
-    desc: Check formatting, lints, tests, documentation and the governed planning store.
+    desc: Refuse formatting, dependency-policy, lint, test, documentation, contract or plan drift.
     cmds:
       - cargo fmt --all -- --check
+      - cargo deny check --hide-inclusion-graph
       - cargo clippy --workspace --all-targets --locked -- -D warnings
       - cargo test --workspace --locked
       - RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --locked
+      - cargo +1.85 build --workspace --locked
       - protocol artifact validate
       - |
         if [ -n "${ENTITY_POSTGRES_URL:-}" ]; then
@@ -20,3 +22,18 @@ tasks:
         else
           echo "postgres-check: skipped, ENTITY_POSTGRES_URL unset"
         fi
+
+  openapi:
+    desc: Generate the public OpenAPI asset from EP-owned routes and DTO schemas.
+    cmds:
+      - cargo run --quiet --locked -p aep-service -- openapi > website/static/openapi.json
+
+  site-build:
+    desc: Install website dependencies, generate OpenAPI, type-check and build the public site.
+    dir: website
+    cmds:
+      - npm ci
+      - npm audit --omit=dev --audit-level=critical
+      - cargo run --quiet --locked -p aep-service --manifest-path ../Cargo.toml -- openapi > static/openapi.json
+      - npm run typecheck
+      - npm run build

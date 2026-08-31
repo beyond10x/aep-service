@@ -1,0 +1,8 @@
+target
+.git
+website/node_modules
+website/build
+.env
+.env.*
+*.pem
+*.key

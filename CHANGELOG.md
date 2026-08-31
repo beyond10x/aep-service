@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.0] — 2026-08-31
+
+- Published the developer-preview repository contract, human README, contributing/security policy,
+  curated Docusaurus site, generated API reference, issue templates, and Apache-2.0 license.
+- Added deterministic OpenAPI 3.1 generation from EP-owned route metadata and JSON Schema DTOs,
+  served the same document at `/openapi.json`, and made route/projection agreement executable.
+- Added UUIDv7 request identities, queue and exchange deadlines, typed overload responses,
+  no-store/nosniff headers, SIGTERM handling with bounded graceful drain, and a built-in health
+  probe. Non-loopback development authentication now requires an explicit warned override.
+- Added `aep-service definitions digest` so deployments can validate an EP tree and derive the
+  exact immutable bundle identity they pin at startup.
+- Added dependency policy and scheduled security auditing, PostgreSQL-backed CI, Pages publishing,
+  tagged Linux binary releases, an unprivileged OCI image, and a local Docker Compose preview.
 - Added a runnable Axum/Tokio service process with bounded request bodies, graceful shutdown,
   EP-owned pinned definition loading, bounded database concurrency, and a loopback-only development
   bearer verifier.
@@ -17,6 +30,6 @@ All notable changes to this project will be documented in this file.
   indexed reads and read-after-write visibility across fresh service handles.
 - Added verified human/delegated-agent principals, server-owned command attribution and an
   authorized realm/workspace service-binding seam before semantic dispatch or materialization.
-- Pinned EP 0.36.4 and Entity Runtime 0.17.3 and verified the v1 service byte-for-byte against EP's
+- Pinned EP 0.38.1 and Entity Runtime 0.17.3 and verified the v1 service byte-for-byte against EP's
   constructed corpus plus the coordinated v2 history exchange.
 - Established the repository, architectural boundaries and governed delivery plan.
