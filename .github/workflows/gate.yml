@@ -38,7 +38,8 @@ jobs:
       - name: Install protocol and cargo-deny
         run: |
           cargo install --git https://github.com/beyond10x/engineering-protocols --tag 0.38.1 --locked protocol-cli
-          cargo install cargo-deny --locked
+          # cargo-deny 0.20 requires Rust 1.88; 0.18.3 is the newest release supporting our MSRV.
+          cargo install cargo-deny --version 0.18.3 --locked
       - run: task check
 
   site:
