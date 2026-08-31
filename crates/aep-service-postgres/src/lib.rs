@@ -1,4 +1,4 @@
-//! Transactional PostgreSQL authority for one configured AEP realm and workspace.
+//! Transactional `PostgreSQL` authority for one configured AEP realm and workspace.
 //!
 //! Each request gets a composite handle: EP's fresh transactional command session and indexed
 //! query orchestration over Entity Runtime's provider-neutral document query capability. Neither
@@ -54,7 +54,7 @@ impl fmt::Display for AuthorityConfigError {
 
 impl std::error::Error for AuthorityConfigError {}
 
-/// Opens fresh semantic service handles for one realm/workspace PostgreSQL authority.
+/// Opens fresh semantic service handles for one realm/workspace `PostgreSQL` authority.
 ///
 /// Wave 1 deliberately configures one workspace. A later identity story can introduce
 /// workspace-scoped coordinates without letting two workspaces share today's unscoped EP ids.
@@ -83,7 +83,7 @@ impl fmt::Debug for PostgresAuthority {
 impl PostgresAuthority {
     /// Configures one authority without opening the database.
     ///
-    /// PostgreSQL silently truncates identifiers beyond 63 bytes. Restricting the schema to a
+    /// `PostgreSQL` silently truncates identifiers beyond 63 bytes. Restricting the schema to a
     /// portable unquoted identifier prevents two configured realms from being truncated onto the
     /// same storage boundary.
     pub fn new(
@@ -120,7 +120,7 @@ impl PostgresAuthority {
         &self.workspace
     }
 
-    /// The PostgreSQL schema dedicated to this realm.
+    /// The `PostgreSQL` schema dedicated to this realm.
     pub fn schema(&self) -> &str {
         &self.schema
     }
@@ -168,7 +168,7 @@ impl PostgresAuthority {
     }
 }
 
-/// One request-scoped semantic handle over a shared PostgreSQL authority.
+/// One request-scoped semantic handle over a shared `PostgreSQL` authority.
 #[derive(Debug)]
 pub struct ScopedPostgresService {
     commands: SessionPostgresBackend,

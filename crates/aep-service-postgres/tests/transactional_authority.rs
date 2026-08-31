@@ -1,4 +1,4 @@
-//! PostgreSQL evidence for a fresh service handle, a torn command and two competing writers.
+//! `PostgreSQL` evidence for a fresh service handle, a torn command and two competing writers.
 
 use std::collections::BTreeMap;
 use std::sync::atomic::{AtomicUsize, Ordering};

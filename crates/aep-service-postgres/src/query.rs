@@ -1,4 +1,4 @@
-//! Indexed, request-scoped reads over the Entity Runtime PostgreSQL provider.
+//! Indexed, request-scoped reads over the Entity Runtime `PostgreSQL` provider.
 
 use std::sync::Mutex;
 
@@ -88,7 +88,7 @@ impl IndexedPostgresQueries {
     }
 }
 
-#[allow(clippy::unused_async_trait_impl)]
+#[allow(unknown_lints, clippy::unused_async_trait_impl)]
 impl QueryService for IndexedPostgresQueries {
     type AuditRecord = AuditRecord;
 

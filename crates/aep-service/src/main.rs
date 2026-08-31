@@ -83,7 +83,7 @@ struct ServeArgs {
     /// Listener address; development authentication requires a loopback address.
     #[arg(long, default_value = "127.0.0.1:8080")]
     bind: SocketAddr,
-    /// Environment variable containing the PostgreSQL URL.
+    /// Environment variable containing the `PostgreSQL` URL.
     #[arg(long, default_value = "AEP_DATABASE_URL")]
     database_url_env: String,
     /// Globally unique realm served by this process.
@@ -92,7 +92,7 @@ struct ServeArgs {
     /// One workspace served by this process.
     #[arg(long)]
     workspace: String,
-    /// PostgreSQL schema dedicated to the realm.
+    /// `PostgreSQL` schema dedicated to the realm.
     #[arg(long)]
     schema: String,
     /// Root of the immutable EP definition tree.
