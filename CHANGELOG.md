@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-08-31
+
+- Rebuilt the public site around the service's authority, evidence and refusal model, with a
+  task-oriented guide, architecture and reliability material, and a responsive visual system.
+- Replaced the runtime-fetched API page with a static, searchable reference rendered from the
+  generated contract, including curl examples, response examples and the complete schema catalog.
+- Enriched the deterministic OpenAPI projection with operation guidance, parameter descriptions,
+  typed examples, stable schema anchors and explicit problem responses.
+- Added a published-image Docker Compose evaluation path that starts PostgreSQL and the unprivileged
+  service image, pins the EP definition bundle, and demonstrates create, replay, read and history.
+- Moved synchronous PostgreSQL authority preparation off the async runtime so the runnable service
+  starts cleanly instead of panicking during provider initialization.
+
 ## [0.1.0] — 2026-08-31
 
 - Published the developer-preview repository contract, human README, contributing/security policy,

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(910 250) rotate(135) scale(410)">
+      <stop stop-color="#6958db" stop-opacity=".42"/><stop offset="1" stop-color="#090c16" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M64 0H0v64" fill="none" stroke="#a59cff" stroke-opacity=".08"/></pattern>
+  </defs>
+  <rect width="1200" height="630" fill="#090c16"/><rect width="1200" height="630" fill="url(#grid)"/><rect width="1200" height="630" fill="url(#glow)"/>
+  <g transform="translate(85 80)">
+    <rect width="64" height="64" rx="15" fill="#111625" stroke="#6f61e8" stroke-width="2"/>
+    <circle cx="19" cy="19" r="5" fill="#55d6e8"/><circle cx="45" cy="19" r="5" fill="#a59cff"/><circle cx="32" cy="46" r="5" fill="#4adaa5"/>
+    <path d="m23 21 7 21m11-21-7 21M24 19h16" stroke="#d7d3ff" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="85" y="225" fill="#8d96aa" font-family="monospace" font-size="22" letter-spacing="4">AEP SERVICE / DEVELOPER PREVIEW</text>
+  <text x="85" y="330" fill="#f4f5fb" font-family="Inter,Arial,sans-serif" font-size="76" font-weight="700" letter-spacing="-4">Engineering decisions,</text>
+  <text x="85" y="420" fill="#a59cff" font-family="Georgia,serif" font-size="80" font-style="italic">held as evidence.</text>
+  <text x="85" y="505" fill="#aab3c5" font-family="Inter,Arial,sans-serif" font-size="27">One attributable, transactional authority for humans and agents.</text>
+  <path d="M85 560h1030" stroke="#a59cff" stroke-opacity=".2"/>
+  <text x="85" y="596" fill="#55d6e8" font-family="monospace" font-size="18" letter-spacing="2">BEYOND10X · APACHE-2.0</text>
+</svg>

@@ -152,7 +152,7 @@ dependencies = [
 
 [[package]]
 name = "aep-service"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aep-client",
  "aep-contract",
@@ -170,7 +170,7 @@ dependencies = [
 
 [[package]]
 name = "aep-service-app"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aep-contract",
  "aep-domain",
@@ -179,14 +179,14 @@ dependencies = [
 
 [[package]]
 name = "aep-service-auth"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aep-domain",
 ]
 
 [[package]]
 name = "aep-service-http"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aep-client",
  "aep-contract",
@@ -198,7 +198,7 @@ dependencies = [
 
 [[package]]
 name = "aep-service-openapi"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aep-client",
  "aep-contract",
@@ -209,7 +209,7 @@ dependencies = [
 
 [[package]]
 name = "aep-service-postgres"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aep-backend-entity",
  "aep-backend-postgres",

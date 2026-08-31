@@ -24,7 +24,11 @@ deterministic projection for review or local use, never a second authoritative w
 
 ## Try the public surface
 
-Generate the same OpenAPI document served at `/openapi.json`:
+The shortest evaluation path uses the released OCI image and requires no Rust toolchain. Follow
+the [published-image quickstart](https://beyond10x.github.io/aep-service/docs/quickstart) to start
+PostgreSQL and AEP Service, submit a governed entity command, replay it, and inspect its history.
+
+For source development, generate the same OpenAPI document served at `/openapi.json`:
 
 ```console
 cargo run --locked -p aep-service -- openapi > openapi.json

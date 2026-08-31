@@ -11,6 +11,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use aep_client::wire::{Method, Request};
 use aep_contract::testing::block_on;
+use aep_domain::artifact::LifecycleRegistry;
 use aep_domain::ids::RequestId;
 use aep_domain::time::Timestamp;
 use aep_service_auth::{AuthenticationError, CredentialVerifier, VerifiedPrincipal};
@@ -209,14 +210,15 @@ async fn serve(arguments: ServeArgs) -> Result<(), Box<dyn std::error::Error>> {
         aep_project::load_pinned_bundle(&arguments.definitions, &arguments.definition_digest)?;
     let lifecycles = bundle.registry.lifecycles().clone();
 
-    let authority = PostgresAuthority::new(
+    let authority = prepare_authority(
         database_url,
         arguments.realm.clone(),
         arguments.workspace.clone(),
         arguments.schema,
         lifecycles,
-    )?;
-    authority.prepare()?;
+    )
+    .await
+    .map_err(std::io::Error::other)?;
     let principal = VerifiedPrincipal::new(
         arguments.dev_authority.parse()?,
         None,
@@ -264,6 +266,23 @@ async fn serve(arguments: ServeArgs) -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
+}
+
+async fn prepare_authority(
+    database_url: String,
+    realm: String,
+    workspace: String,
+    schema: String,
+    lifecycles: LifecycleRegistry,
+) -> Result<PostgresAuthority, String> {
+    tokio::task::spawn_blocking(move || {
+        let authority = PostgresAuthority::new(database_url, realm, workspace, schema, lifecycles)
+            .map_err(|error| error.to_string())?;
+        authority.prepare().map_err(|error| error.to_string())?;
+        Ok(authority)
+    })
+    .await
+    .map_err(|_| "PostgreSQL authority preparation task failed".to_owned())?
 }
 
 fn validate_listener(bind: SocketAddr, allow_insecure: bool) -> Result<(), &'static str> {
@@ -525,5 +544,20 @@ mod tests {
         };
         let DefinitionsCommand::Digest { path } = arguments.command;
         assert_eq!(path, PathBuf::from("../engineering-protocols"));
+    }
+
+    #[tokio::test]
+    async fn database_preparation_runs_outside_the_async_runtime() {
+        let error = prepare_authority(
+            "postgresql://127.0.0.1:1/unavailable".to_owned(),
+            "realm".to_owned(),
+            "workspace".to_owned(),
+            "aep_runtime_boundary".to_owned(),
+            LifecycleRegistry::new(),
+        )
+        .await
+        .expect_err("the deliberately unavailable database is refused");
+
+        assert_eq!(error, "the PostgreSQL authority is unavailable");
     }
 }

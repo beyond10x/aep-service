@@ -1,7 +1,7 @@
 {
   "name": "aep-service-website",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "scripts": {
     "build": "docusaurus build",
     "start": "docusaurus start",
