@@ -17,6 +17,6 @@ All notable changes to this project will be documented in this file.
   indexed reads and read-after-write visibility across fresh service handles.
 - Added verified human/delegated-agent principals, server-owned command attribution and an
   authorized realm/workspace service-binding seam before semantic dispatch or materialization.
-- Pinned EP 0.36.2 and Entity Runtime 0.17.3 and verified the v1 service byte-for-byte against EP's
+- Pinned EP 0.36.3 and Entity Runtime 0.17.3 and verified the v1 service byte-for-byte against EP's
   constructed corpus plus the coordinated v2 history exchange.
 - Established the repository, architectural boundaries and governed delivery plan.

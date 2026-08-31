@@ -19,13 +19,13 @@ authors = ["Beyond10x contributor <1379383+beyond10x@users.noreply.github.com>"]
 [workspace.dependencies]
 # EP owns the semantic contract and its verified wire bytes. One exact release keeps every
 # consuming crate on the same coordinated boundary (atlas ADR 0008 and ADR 0009).
-aep-client = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.36.2" }
-aep-backend-entity = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.36.2" }
-aep-backend-postgres = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.36.2" }
-aep-contract = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.36.2" }
-aep-domain = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.36.2" }
-aep-project = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.36.2" }
-# The service uses the same released provider EP 0.36.2 was verified against. Declaring the pin
+aep-client = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.36.3" }
+aep-backend-entity = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.36.3" }
+aep-backend-postgres = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.36.3" }
+aep-contract = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.36.3" }
+aep-domain = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.36.3" }
+aep-project = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.36.3" }
+# The service uses the same released provider EP 0.36.3 was verified against. Declaring the pin
 # once here prevents a crate-local ER selection from introducing a second provider generation.
 entity-postgres = { git = "https://github.com/beyond10x/entity-runtime", tag = "0.17.3" }
 entity-core = { git = "https://github.com/beyond10x/entity-runtime", tag = "0.17.3" }
