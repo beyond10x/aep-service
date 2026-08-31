@@ -35,11 +35,15 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - uses: arduino/setup-task@b91d5d2c96a56797b48ac1e0e89220bf64044611 # v2
-      - name: Install protocol and cargo-deny
+      - name: Install protocol
         run: |
           cargo install --git https://github.com/beyond10x/engineering-protocols --tag 0.38.1 --locked protocol-cli
-          # cargo-deny 0.20 requires Rust 1.88; 0.18.3 is the newest release supporting our MSRV.
-          cargo install cargo-deny --version 0.18.3 --locked
+      - name: Install cargo-deny with its own pinned toolchain
+        run: |
+          # Audit tooling may move faster than the service MSRV. Keep the service gate on 1.85
+          # while compiling the pinned auditor with the minimum toolchain it requires.
+          rustup toolchain install 1.88.0 --profile minimal
+          cargo +1.88.0 install cargo-deny --version 0.20.2 --locked
       - run: task check
 
   site:
