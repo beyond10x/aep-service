@@ -5,7 +5,7 @@ version: aep.project/1
 # profiles of this project's own go under `principles/` and `profiles/` beside this file.
 protocol: adp/1
 profile: development.standard
-protocols: git+ssh://git@github.com/beyond10x/engineering-protocols.git#020efb3a1f2260d59994bbd9449942cdb18a93e7
+protocols: git+https://github.com/beyond10x/engineering-protocols.git#020efb3a1f2260d59994bbd9449942cdb18a93e7
 
 summary: >-
   The authenticated central authority for AEP commands, queries, history, definition bundles and
