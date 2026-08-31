@@ -1,0 +1,17 @@
+# Task runner for aep-service. Requires go-task (https://taskfile.dev).
+version: "3"
+
+tasks:
+  default:
+    desc: Run the complete local gate.
+    deps: [check]
+
+  check:
+    desc: Check formatting, lints, tests, documentation and the governed planning store.
+    cmds:
+      - cargo fmt --all -- --check
+      - cargo clippy --workspace --all-targets --locked -- -D warnings
+      - cargo test --workspace --locked
+      - RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --locked
+      - protocol artifact validate
+
