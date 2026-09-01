@@ -1,6 +1,6 @@
 import type {Config} from '@docusaurus/types';
 import type {Options, ThemeConfig} from '@docusaurus/preset-classic';
-import docsSystemPlugin from '@beyond10x/docs-system/docusaurus';
+import docsSystemPlugin, {ecosystemFooterGroup, ecosystemNavbarItems} from '@beyond10x/docs-system/docusaurus';
 
 const config: Config = {
   title: 'AEP Service',
@@ -40,8 +40,7 @@ const config: Config = {
       hideOnScroll: true,
       logo: {alt: 'AEP Service linked authority mark', src: 'img/mark.svg'},
       items: [
-        {href: 'https://beyond10x.github.io/getting-started/', label: 'beyond10x', position: 'left'},
-        {href: 'https://beyond10x.github.io/getting-started/ecosystem', label: 'Ecosystem', position: 'left'},
+        ...ecosystemNavbarItems(),
         {to: '/docs/intro', label: 'Docs', position: 'left'},
         {to: '/docs/architecture', label: 'Architecture', position: 'left'},
         {to: '/api', label: 'API', position: 'left'},
@@ -51,6 +50,7 @@ const config: Config = {
     footer: {
       style: 'dark',
       links: [
+        ecosystemFooterGroup(),
         {title: 'Evaluate', items: [{label: 'Run the preview', to: '/docs/quickstart'}, {label: 'Architecture', to: '/docs/architecture'}, {label: 'API reference', to: '/api'}]},
         {title: 'Operate', items: [{label: 'Configuration', to: '/docs/configuration'}, {label: 'Reliability', to: '/docs/reliability'}, {label: 'Security', to: '/docs/security'}]},
         {title: 'Ecosystem', items: [{label: 'AEP', href: 'https://beyond10x.github.io/aep/'}, {label: 'ESS', href: 'https://beyond10x.github.io/ess/'}, {label: 'Entity Runtime', href: 'https://github.com/beyond10x/entity-runtime'}, {label: 'Source on GitHub', href: 'https://github.com/beyond10x/aep-service'}]},
