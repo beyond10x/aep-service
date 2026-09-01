@@ -39,7 +39,7 @@ postgres = { version = "0.19", default-features = false }
 serde = "1.0"
 serde_json = "1.0"
 # OpenAPI is projected from AEP's schema-enabled DTOs; this exact major matches AEP's derivation API.
-schemars = "0.8"
+schemars = "1.2"
 # The one process boundary selected for Wave 1. Axum supplies HTTP routing without placing a
 # framework in AEP's wire crate; Tokio owns sockets, signals and bounded blocking work here only.
 axum = "0.8"
