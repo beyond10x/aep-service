@@ -17,7 +17,7 @@ machine, never with production data or a publicly reachable Docker host.
 
 Create a clean directory and clone the exact source generations used by this guide:
 
-```console
+```bash
 mkdir aep-evaluation && cd aep-evaluation
 git clone --branch 0.1.1 --depth 1 https://github.com/beyond10x/aep-service.git
 git clone --branch 0.40.0 --depth 1 https://github.com/beyond10x/aep.git
@@ -26,7 +26,7 @@ cd aep-service
 
 Choose a local token and ask the released image to validate and digest the definition tree:
 
-```console
+```bash
 export AEP_DEV_BEARER_TOKEN='local-preview-change-me'
 export AEP_DEFINITIONS_PATH='../aep'
 export AEP_DEFINITION_DIGEST="$(docker run --rm \
@@ -39,7 +39,7 @@ The command refuses an invalid definition tree rather than hashing bytes it cann
 
 ## 2. Start one local authority
 
-```console
+```bash
 docker compose -f compose.preview.yaml up --detach
 docker compose -f compose.preview.yaml ps
 curl --fail http://127.0.0.1:8080/readyz
@@ -51,7 +51,7 @@ mapping remains `127.0.0.1:8080` on the host.
 
 Define the strict version-1 media type once:
 
-```console
+```bash
 export AEP_MEDIA_TYPE='application/vnd.aep.service+json;version=1'
 ```
 
@@ -59,7 +59,7 @@ export AEP_MEDIA_TYPE='application/vnd.aep.service+json;version=1'
 
 Write the command once so the replay below is byte-for-byte obvious:
 
-```console
+```bash
 cat > create-story.json <<'JSON'
 {
   "command_id": "docs-create-story",
@@ -100,7 +100,7 @@ request because the server derives them.
 
 Read the entity the command created:
 
-```console
+```bash
 curl --fail-with-body \
   --header "Authorization: Bearer $AEP_DEV_BEARER_TOKEN" \
   --header "Accept: $AEP_MEDIA_TYPE" \
@@ -109,7 +109,7 @@ curl --fail-with-body \
 
 Replay the exact command document:
 
-```console
+```bash
 curl --fail-with-body \
   --request POST \
   --header "Authorization: Bearer $AEP_DEV_BEARER_TOKEN" \
@@ -124,7 +124,7 @@ for different intent produces a typed conflict instead.
 
 Inspect the immutable revision sequence:
 
-```console
+```bash
 curl --fail-with-body \
   --header "Authorization: Bearer $AEP_DEV_BEARER_TOKEN" \
   --header "Accept: $AEP_MEDIA_TYPE" \
@@ -133,7 +133,7 @@ curl --fail-with-body \
 
 ## 5. Clean up
 
-```console
+```bash
 docker compose -f compose.preview.yaml down --volumes
 cd ../..
 ```

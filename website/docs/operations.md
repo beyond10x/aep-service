@@ -34,7 +34,7 @@ preview does not yet run a continuous downstream health query on every request.
 
 Use the binary rather than curl inside a container health check:
 
-```console
+```bash
 aep-service probe --address 127.0.0.1:8080 --readiness
 ```
 

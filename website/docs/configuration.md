@@ -45,7 +45,7 @@ Zero concurrency or zero timeout values are refused at startup.
 
 ## Utility commands
 
-```console
+```bash
 aep-service definitions digest --path /definitions
 aep-service openapi
 aep-service probe --address 127.0.0.1:8080
