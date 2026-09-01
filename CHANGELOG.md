@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Reduced tagged delivery to the supported Linux diagnostic archive and multiarch OCI image, and
+  moved release and manifest finalization into their producing jobs so account limits cannot strand
+  already-built artifacts in new post-build runners.
+
 ## [0.1.4] — 2026-09-01
 
 - Accelerated tagged delivery with cached gate tools and native release builds, replaced emulated

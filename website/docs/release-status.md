@@ -16,7 +16,7 @@ evaluation. It is not a hosted multi-tenant control plane or production authenti
 - complete revision, relation, audit and durable idempotency records;
 - definition digest pinning, typed refusals, concurrency/deadline limits and graceful shutdown;
 - loopback-bound OCI evaluation with liveness/readiness probes;
-- checksummed Linux and macOS binaries; and
+- a checksummed Linux diagnostic binary; and
 - public documentation, source, issues and private vulnerability reporting.
 
 ## Next boundaries
