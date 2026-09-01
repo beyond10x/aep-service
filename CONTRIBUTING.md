@@ -13,7 +13,7 @@ task site-build
 ```
 
 Set `ENTITY_POSTGRES_URL` to a disposable PostgreSQL database to run the durable transaction tests.
-Never use production data. Generated OpenAPI comes from the EP-owned route catalog and DTO schemas;
+Never use production data. Generated OpenAPI comes from the AEP-owned route catalog and DTO schemas;
 do not hand-edit a generated JSON file or restate the contract in documentation.
 
 By participating, follow the [Contributor Covenant](CODE_OF_CONDUCT.md). All contributions are

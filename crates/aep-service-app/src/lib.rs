@@ -1,6 +1,6 @@
 //! Application orchestration for authenticated AEP commands and queries.
 //!
-//! This crate composes trusted request context, authorization, EP decisions and transactional
+//! This crate composes trusted request context, authorization, AEP decisions and transactional
 //! persistence without depending on a concrete network transport.
 
 use std::fmt;
@@ -44,7 +44,7 @@ impl ServiceScope {
 ///
 /// An authorized service handle is selected from this value before semantic dispatch. That keeps
 /// query authorization and realm/workspace selection present even though the storage-independent
-/// EP query trait deliberately has no network request-context parameter.
+/// AEP query trait deliberately has no network request-context parameter.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TrustedRequestContext {
     principal: VerifiedPrincipal,
@@ -146,7 +146,7 @@ impl std::error::Error for ServiceBindingError {}
 
 /// Selects a semantic command/query implementation already narrowed to trusted request context.
 ///
-/// The selected service still implements EP's ordinary semantic traits directly; this port adds
+/// The selected service still implements AEP's ordinary semantic traits directly; this port adds
 /// no second command model. It exists so realm, workspace, roles and delegation scope cannot be
 /// dropped before a query is materialized.
 pub trait ServiceProvider {

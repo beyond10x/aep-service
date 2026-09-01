@@ -35,7 +35,7 @@ services:
       - --definitions
       - /definitions
       - --definition-digest
-      - ${AEP_DEFINITION_DIGEST:?set the digest of the mounted EP definition tree}
+      - ${AEP_DEFINITION_DIGEST:?set the digest of the mounted AEP definition tree}
     healthcheck:
       test: ["CMD", "aep-service", "probe", "--address", "127.0.0.1:8080", "--readiness"]
       interval: 5s
@@ -44,7 +44,7 @@ services:
     ports:
       - 127.0.0.1:8080:8080
     volumes:
-      - ${AEP_DEFINITIONS_PATH:-../engineering-protocols}:/definitions:ro
+      - ${AEP_DEFINITIONS_PATH:-../aep}:/definitions:ro
 
 volumes:
   aep-preview-postgres:

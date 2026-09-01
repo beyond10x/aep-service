@@ -1,15 +1,15 @@
 # Local preview bundle
 
 The root `compose.yaml` builds the service, starts PostgreSQL, mounts a sibling
-`../engineering-protocols` checkout read-only as the immutable definition tree, and exposes the
+`../aep` checkout read-only as the immutable definition tree, and exposes the
 explicitly insecure development listener only on host loopback.
 
 Compute the exact digest expected by `aep_project::load_pinned_bundle` and start the bundle:
 
 ```console
-git -C ../engineering-protocols checkout 0.38.1
+git -C ../aep checkout 0.40.0
 export AEP_DEFINITION_DIGEST="$(cargo run --quiet --locked -p aep-service -- \
-  definitions digest --path ../engineering-protocols)"
+  definitions digest --path ../aep)"
 export AEP_DEV_BEARER_TOKEN=<local-only-token>
 docker compose up --build
 ```

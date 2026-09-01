@@ -15,7 +15,7 @@ environment variables.
 | `--realm` | Globally scoped realm served by this process |
 | `--workspace` | One workspace admitted by this process |
 | `--schema` | PostgreSQL schema dedicated to the configured authority |
-| `--definitions` | Root of the immutable EP definition tree |
+| `--definitions` | Root of the immutable AEP definition tree |
 | `--definition-digest` | Expected lowercase SHA-256 for the validated tree |
 
 The database URL defaults to environment variable `AEP_DATABASE_URL`; change the variable name with

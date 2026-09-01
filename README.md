@@ -74,8 +74,8 @@ boundary.
 | `aep-service` | process configuration, listener, limits, probes, shutdown |
 | `aep-service-app` | authenticated command/query orchestration |
 | `aep-service-auth` | verified human and delegated-agent principal model |
-| `aep-service-http` | HTTP realization of the EP-owned contract |
-| `aep-service-openapi` | deterministic OpenAPI projection from EP routes and DTO schemas |
+| `aep-service-http` | HTTP realization of the AEP-owned contract |
+| `aep-service-openapi` | deterministic OpenAPI projection from AEP routes and DTO schemas |
 | `aep-service-postgres` | fresh transactional command sessions and indexed queries |
 
 These are boundaries inside one deployable service, not a microservice decomposition.

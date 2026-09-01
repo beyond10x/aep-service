@@ -20,7 +20,7 @@ The service succeeds when:
 - `protocol` can operate from any adopting repository against one authenticated authority;
 - an agent can never exercise more authority than its owner delegated;
 - every accepted or refused authenticated command is attributable and replayable against its
-  governing EP definition bundle;
+  governing AEP definition bundle;
 - cross-repository dependencies and objective chains are queryable without parsing Git trees;
 - authorized snapshots reproduce repository Markdown byte-for-byte; and
 - no client needs PostgreSQL credentials or a raw Entity Runtime store interface.

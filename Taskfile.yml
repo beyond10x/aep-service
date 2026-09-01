@@ -24,7 +24,7 @@ tasks:
         fi
 
   openapi:
-    desc: Generate the public OpenAPI asset from EP-owned routes and DTO schemas.
+    desc: Generate the public OpenAPI asset from AEP-owned routes and DTO schemas.
     cmds:
       - cargo run --quiet --locked -p aep-service -- openapi > website/static/openapi.json
 

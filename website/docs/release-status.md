@@ -10,7 +10,7 @@ evaluation. It is not a hosted multi-tenant control plane or production authenti
 
 ## Available now
 
-- EP-owned strict command/query HTTP contracts with deterministic OpenAPI;
+- AEP-owned strict command/query HTTP contracts with deterministic OpenAPI;
 - trusted-context orchestration seams for humans and delegated agents;
 - fresh PostgreSQL command transactions and indexed bounded queries through Entity Runtime;
 - complete revision, relation, audit and durable idempotency records;

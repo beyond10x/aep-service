@@ -1,4 +1,4 @@
-//! HTTP realization of the EP-owned command/query service contract.
+//! HTTP realization of the AEP-owned command/query service contract.
 //!
 //! This adapter validates wire versions and paths, verifies credentials, authorizes the requested
 //! realm/workspace and only then decodes or dispatches semantic intent. It owns no AEP decision

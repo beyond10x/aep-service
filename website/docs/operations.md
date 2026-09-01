@@ -11,7 +11,7 @@ The process refuses to listen until it has:
 
 1. validated the listener and explicit development-authentication boundary;
 2. read the database URL and non-empty development token;
-3. loaded, validated and digest-verified the EP definition tree;
+3. loaded, validated and digest-verified the AEP definition tree;
 4. prepared the PostgreSQL authority schema; and
 5. constructed the scoped application service.
 

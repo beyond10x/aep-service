@@ -1,4 +1,4 @@
-//! Deterministic `OpenAPI` 3.1 projection of the EP-owned service wire.
+//! Deterministic `OpenAPI` 3.1 projection of the AEP-owned service wire.
 //!
 //! Paths come from [`aep_client::wire::ROUTES`] and payload schemas come from the strict wire
 //! structs' [`schemars::JsonSchema`] implementations. This crate owns presentation metadata only.

@@ -14,8 +14,8 @@ trying the service, while this file names what an agent must preserve.
 
 ## Mission and boundary
 
-This repository is one deployable Rust service and its internal crates. It implements Engineering
-Protocols' `CommandService` and `QueryService` over Entity Runtime PostgreSQL providers. It is not
+This repository is one deployable Rust service and its internal crates. It implements AEP's
+`CommandService` and `QueryService` over Entity Runtime PostgreSQL providers. It is not
 the owner of AEP vocabulary, an identity provider, a raw Entity Runtime store endpoint, a Jira
 replacement UI, or a Markdown persistence model.
 
@@ -54,7 +54,7 @@ definition of the wire or copy private organizational records.
    `--allow-insecure-dev-listener` is explicit. That override must remain visibly named and warned.
 10. Listener work is bounded: request bodies, execution concurrency, queue wait, exchange duration,
     and graceful shutdown all have explicit limits. Overload uses a typed AEP problem document.
-11. `/openapi.json` is generated from EP route/schema APIs. A handwritten payload or path model in
+11. `/openapi.json` is generated from AEP route/schema APIs. A handwritten payload or path model in
     this repository is a defect.
 12. PostgreSQL credentials never reach clients. Credentials, tokens, company data, private
     transcripts, and production configuration never enter this tree.
@@ -65,10 +65,10 @@ definition of the wire or copy private organizational records.
 
 ## Cross-repository changes
 
-Engineering Protocols owns semantic types, strict wire bytes, routes, and the official client.
+AEP owns semantic types, strict wire bytes, routes, and the official client.
 Entity Runtime owns its kernel and provider interfaces. If bytes another repository verifies, a
 token audience, or a provider contract changes, coordinate a versioned migration before updating
-the pin here. Workspace dependencies select one exact EP tag and one exact ER tag; crate-local pins
+the pin here. Workspace dependencies select one exact AEP tag and one exact ER tag; crate-local pins
 are not allowed.
 
 ## Planning store
@@ -96,10 +96,10 @@ to `Taskfile.yml` and CI together so pull requests and releases cannot exercise 
 ## Branch protection
 
 `main` carries the active ruleset `main: checks before merge` (id `21939350`). The `gate` and
-`site` checks are required, deletion and non-fast-forward updates are forbidden, and repository
-administrators plus the `b10x-bot` integration can bypass it for the bot-only direct-push workflow.
-If a job name changes, update the ruleset in the same operation; an obsolete required context
-blocks every pull request without protecting anything.
+`site` checks are required, and deletion and non-fast-forward updates are forbidden. Delivery
+credentials and privileged publication procedures are private Atlas concerns and do not belong in
+this public repository. If a job name changes, update the ruleset in the same operation; an
+obsolete required context blocks every pull request without protecting anything.
 
 ## Implementation conventions
 

@@ -1,4 +1,4 @@
-//! Service-side verification of the EP-owned constructed wire corpus.
+//! Service-side verification of the AEP-owned constructed wire corpus.
 
 use std::cell::RefCell;
 use std::collections::BTreeMap;

@@ -44,7 +44,7 @@ enum Command {
     Serve(Box<ServeArgs>),
     /// Prints the generated `OpenAPI` document to standard output.
     Openapi,
-    /// Inspects an immutable EP definition tree for deployment.
+    /// Inspects an immutable AEP definition tree for deployment.
     Definitions(DefinitionsArgs),
     /// Checks a running process's liveness or readiness endpoint.
     Probe(ProbeArgs),
@@ -60,7 +60,7 @@ struct DefinitionsArgs {
 enum DefinitionsCommand {
     /// Validates a definition tree and prints its source-byte digest.
     Digest {
-        /// Root of the EP definition tree.
+        /// Root of the AEP definition tree.
         #[arg(long, default_value = ".")]
         path: PathBuf,
     },
@@ -96,7 +96,7 @@ struct ServeArgs {
     /// `PostgreSQL` schema dedicated to the realm.
     #[arg(long)]
     schema: String,
-    /// Root of the immutable EP definition tree.
+    /// Root of the immutable AEP definition tree.
     #[arg(long)]
     definitions: PathBuf,
     /// Expected lowercase SHA-256 of sorted definition paths and bytes.
@@ -531,19 +531,14 @@ mod tests {
 
     #[test]
     fn definition_digest_is_an_explicit_read_only_subcommand() {
-        let arguments = Cli::try_parse_from([
-            "aep-service",
-            "definitions",
-            "digest",
-            "--path",
-            "../engineering-protocols",
-        ])
-        .unwrap();
+        let arguments =
+            Cli::try_parse_from(["aep-service", "definitions", "digest", "--path", "../aep"])
+                .unwrap();
         let Command::Definitions(arguments) = arguments.command else {
             panic!("definition command");
         };
         let DefinitionsCommand::Digest { path } = arguments.command;
-        assert_eq!(path, PathBuf::from("../engineering-protocols"));
+        assert_eq!(path, PathBuf::from("../aep"));
     }
 
     #[tokio::test]

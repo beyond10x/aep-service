@@ -20,7 +20,7 @@ Create a clean directory and clone the exact source generations used by this gui
 ```console
 mkdir aep-evaluation && cd aep-evaluation
 git clone --branch 0.1.1 --depth 1 https://github.com/beyond10x/aep-service.git
-git clone --branch 0.38.1 --depth 1 https://github.com/beyond10x/aep.git
+git clone --branch 0.40.0 --depth 1 https://github.com/beyond10x/aep.git
 cd aep-service
 ```
 

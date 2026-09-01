@@ -5,8 +5,8 @@ work and names the acceptance boundary of each wave; it does not duplicate artif
 
 ## Wave 0 — publish the boundary
 
-Agree and version the EP-owned command/query service wire, authentication-derived context and
-compatibility rules. `aep-service` serves the contract; `engineering-protocols` keeps the official
+Agree and version the AEP-owned command/query service wire, authentication-derived context and
+compatibility rules. `aep-service` serves the contract; `aep` keeps the official
 client and `protocol` integration. Any shared verified bytes are introduced through an atlas ADR.
 
 Work: `epic:application-service-boundary`.
@@ -36,7 +36,7 @@ Work: `epic:public-developer-preview`.
 Verify the assumed human and delegated-agent tokens, derive actor and executor server-side, enforce
 workspace roles and delegation scopes, and authorize queries before traversal or materialization.
 Once that boundary holds, expose an MCP adapter for agents. Its tools and resources project the same
-EP-owned command/query service; MCP does not gain a second mutation path or a raw Entity Runtime
+AEP-owned command/query service; MCP does not gain a second mutation path or a raw Entity Runtime
 store surface.
 
 Work: `epic:identity-and-access`, plus `story:mcp-agent-access` under
@@ -44,7 +44,7 @@ Work: `epic:identity-and-access`, plus `story:mcp-agent-access` under
 
 ## Wave 3 — adopt repositories without losing Git review
 
-Export consistent authorized snapshots, materialize deterministic Markdown through EP, and make one
+Export consistent authorized snapshots, materialize deterministic Markdown through AEP, and make one
 repository use the service as authority while retaining committed generated documents and a drift
 gate. Add cross-repository graph and blocker views after one repository is stable.
 
@@ -52,7 +52,7 @@ Work: `epic:projections-and-adoption` except Jira intake.
 
 ## Wave 4 — evolve the model deliberately
 
-Register immutable EP bundles, preflight them against stored instances, activate a new default and
+Register immutable AEP bundles, preflight them against stored instances, activate a new default and
 migrate instances with recorded events. Historical decisions retain the exact definition bytes
 that produced them.
 

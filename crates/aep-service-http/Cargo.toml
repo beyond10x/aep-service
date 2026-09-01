@@ -1,6 +1,6 @@
 [package]
 name = "aep-service-http"
-description = "HTTP server adapter for the EP-owned AEP service wire."
+description = "HTTP server adapter for the AEP-owned AEP service wire."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

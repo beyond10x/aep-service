@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Pinned the service to AEP 0.40.0 at its canonical repository and removed the retired ESS-owned
+  conformance fields from AEP command handling while preserving the published HTTP contract.
+
 ## [0.1.1] — 2026-08-31
 
 - Rebuilt the public site around the service's authority, evidence and refusal model, with a

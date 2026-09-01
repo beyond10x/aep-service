@@ -232,9 +232,9 @@ export default function Home(): ReactNode {
             <div>
               <p className={styles.sectionLabel}>RUN THE RELEASED SURFACE</p>
               <Heading as="h2" id="quickstart-title">From empty database to governed story.</Heading>
-              <p className={styles.quickstartLede}>Use the public multiarch image, PostgreSQL, and the pinned EP definitions. No local Rust toolchain is required.</p>
+              <p className={styles.quickstartLede}>Use the public multiarch image, PostgreSQL, and the pinned AEP definitions. No local Rust toolchain is required.</p>
               <ol className={styles.quickSteps}>
-                <li><span>1</span><div><strong>Pin the definitions</strong><p>Clone EP 0.38.1 and compute its immutable digest.</p></div></li>
+                <li><span>1</span><div><strong>Pin the definitions</strong><p>Clone AEP 0.40.0 and compute its immutable digest.</p></div></li>
                 <li><span>2</span><div><strong>Start one authority</strong><p>Compose binds the preview listener to host loopback.</p></div></li>
                 <li><span>3</span><div><strong>Submit intent</strong><p>Create, query, replay, then inspect history.</p></div></li>
               </ol>

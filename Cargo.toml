@@ -15,18 +15,18 @@ edition = "2021"
 rust-version = "1.85"
 license = "Apache-2.0"
 repository = "https://github.com/beyond10x/aep-service"
-authors = ["Beyond10x contributor <1379383+beyond10x@users.noreply.github.com>"]
+authors = ["Beyond10x"]
 
 [workspace.dependencies]
-# EP owns the semantic contract and its verified wire bytes. One exact release keeps every
+# AEP owns the semantic contract and its verified wire bytes. One exact release keeps every
 # consuming crate on the same coordinated boundary (atlas ADR 0011 and ADR 0012).
-aep-client = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.38.1" }
-aep-backend-entity = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.38.1" }
-aep-backend-postgres = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.38.1" }
-aep-contract = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.38.1" }
-aep-domain = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.38.1" }
-aep-project = { git = "https://github.com/beyond10x/engineering-protocols", tag = "0.38.1" }
-# The service uses the same released provider EP 0.36.4 was verified against. Declaring the pin
+aep-client = { git = "https://github.com/beyond10x/aep", tag = "0.40.0" }
+aep-backend-entity = { git = "https://github.com/beyond10x/aep", tag = "0.40.0" }
+aep-backend-postgres = { git = "https://github.com/beyond10x/aep", tag = "0.40.0" }
+aep-contract = { git = "https://github.com/beyond10x/aep", tag = "0.40.0" }
+aep-domain = { git = "https://github.com/beyond10x/aep", tag = "0.40.0" }
+aep-project = { git = "https://github.com/beyond10x/aep", tag = "0.40.0" }
+# The service uses the same released provider AEP 0.40.0 was verified against. Declaring the pin
 # once here prevents a crate-local ER selection from introducing a second provider generation.
 entity-postgres = { git = "https://github.com/beyond10x/entity-runtime", tag = "0.17.3" }
 entity-core = { git = "https://github.com/beyond10x/entity-runtime", tag = "0.17.3" }
@@ -35,13 +35,13 @@ entity-store = { git = "https://github.com/beyond10x/entity-runtime", tag = "0.1
 # Integration tests install a deliberately failing database trigger and inspect the transaction
 # afterward. Production persistence remains the Entity Runtime provider above.
 postgres = { version = "0.19", default-features = false }
-# The HTTP adapter is generic over EP response documents and therefore names Serde's public traits.
+# The HTTP adapter is generic over AEP response documents and therefore names Serde's public traits.
 serde = "1.0"
 serde_json = "1.0"
-# OpenAPI is projected from EP's schema-enabled DTOs; this exact major matches EP's derivation API.
+# OpenAPI is projected from AEP's schema-enabled DTOs; this exact major matches AEP's derivation API.
 schemars = "0.8"
 # The one process boundary selected for Wave 1. Axum supplies HTTP routing without placing a
-# framework in EP's wire crate; Tokio owns sockets, signals and bounded blocking work here only.
+# framework in AEP's wire crate; Tokio owns sockets, signals and bounded blocking work here only.
 axum = "0.8"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "signal", "sync", "time"] }
 clap = { version = "4.6", features = ["derive"] }

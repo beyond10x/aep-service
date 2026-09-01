@@ -1,6 +1,6 @@
 [package]
 name = "aep-service-openapi"
-description = "Deterministic OpenAPI projection of the EP-owned AEP service contract."
+description = "Deterministic OpenAPI projection of the AEP-owned AEP service contract."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

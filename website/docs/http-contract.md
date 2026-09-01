@@ -3,7 +3,7 @@ title: HTTP contract
 description: Routing, media negotiation, authentication and response conventions for the AEP Service API.
 ---
 
-# A strict HTTP realization of the EP wire
+# A strict HTTP realization of the AEP wire
 
 All semantic routes sit below:
 
@@ -49,7 +49,7 @@ received timestamps come from the server clock.
 |---|---|
 | `/livez` | The process listener is alive |
 | `/readyz` | Definitions and PostgreSQL were prepared before the listener became available |
-| `/openapi.json` | Deterministic OpenAPI 3.1 generated from EP routes and schemas |
+| `/openapi.json` | Deterministic OpenAPI 3.1 generated from AEP routes and schemas |
 
 ## Limits
 

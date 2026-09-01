@@ -31,7 +31,7 @@ const config: Config = {
     metadata: [
       {
         name: 'keywords',
-        content: 'AEP Service, engineering protocols, governed engineering, entity runtime, agent planning, attributable decisions, semantic API',
+        content: 'AEP Service, governed engineering, entity runtime, agent planning, attributable decisions, semantic API',
       },
     ],
     colorMode: {defaultMode: 'dark', respectPrefersColorScheme: true},

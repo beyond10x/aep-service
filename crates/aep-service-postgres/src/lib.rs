@@ -1,6 +1,6 @@
 //! Transactional `PostgreSQL` authority for one configured AEP realm and workspace.
 //!
-//! Each request gets a composite handle: EP's fresh transactional command session and indexed
+//! Each request gets a composite handle: AEP's fresh transactional command session and indexed
 //! query orchestration over Entity Runtime's provider-neutral document query capability. Neither
 //! side hydrates the realm. A command's bounded candidate view and complete atomic batch live in
 //! one outer transaction; a query materializes only the rows its authorized question selects.
@@ -57,7 +57,7 @@ impl std::error::Error for AuthorityConfigError {}
 /// Opens fresh semantic service handles for one realm/workspace `PostgreSQL` authority.
 ///
 /// Wave 1 deliberately configures one workspace. A later identity story can introduce
-/// workspace-scoped coordinates without letting two workspaces share today's unscoped EP ids.
+/// workspace-scoped coordinates without letting two workspaces share today's unscoped AEP ids.
 /// Keeping the admitted scope explicit now prevents that later change from becoming a data leak.
 pub struct PostgresAuthority {
     database_url: String,
