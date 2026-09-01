@@ -15,7 +15,7 @@ tasks:
       - cargo test --workspace --locked
       - RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --locked
       - cargo +1.85 build --workspace --locked
-      - protocol artifact validate
+      - aep artifact validate
       - |
         if [ -n "${ENTITY_POSTGRES_URL:-}" ]; then
           echo "postgres-check: passed, ENTITY_POSTGRES_URL set"

@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-09-01
+
+- Repin the service to AEP 0.40.3 and Entity Runtime 0.17.5, and use the canonical `aep` command
+  for the governed planning gate while retaining compatibility with `protocol` through AEP.
+
 ## [0.1.2] — 2026-09-01
 
 - Pinned the service to sanitized AEP 0.40.1 and Entity Runtime 0.17.4 releases at their canonical
