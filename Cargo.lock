@@ -8,8 +8,8 @@ version = "0.40.3"
 source = "git+https://github.com/beyond10x/aep?tag=0.40.3#52ca1ec48da9c744e2e551eab64f7cbad6ab7c3c"
 dependencies = [
  "aep-backend-memory",
- "aep-contract",
- "aep-domain",
+ "aep-contract 0.40.3",
+ "aep-domain 0.40.3",
  "entity-core",
  "entity-store",
  "serde",
@@ -23,8 +23,8 @@ source = "git+https://github.com/beyond10x/aep?tag=0.40.3#52ca1ec48da9c744e2e551
 dependencies = [
  "aep-backend-entity",
  "aep-backend-memory",
- "aep-contract",
- "aep-domain",
+ "aep-contract 0.40.3",
+ "aep-domain 0.40.3",
  "entity-core",
  "entity-store",
  "schemars",
@@ -39,8 +39,8 @@ name = "aep-backend-memory"
 version = "0.40.3"
 source = "git+https://github.com/beyond10x/aep?tag=0.40.3#52ca1ec48da9c744e2e551eab64f7cbad6ab7c3c"
 dependencies = [
- "aep-contract",
- "aep-domain",
+ "aep-contract 0.40.3",
+ "aep-domain 0.40.3",
  "serde",
 ]
 
@@ -50,8 +50,8 @@ version = "0.40.3"
 source = "git+https://github.com/beyond10x/aep?tag=0.40.3#52ca1ec48da9c744e2e551eab64f7cbad6ab7c3c"
 dependencies = [
  "aep-backend-entity",
- "aep-contract",
- "aep-domain",
+ "aep-contract 0.40.3",
+ "aep-domain 0.40.3",
  "entity-core",
  "entity-postgres",
  "entity-query",
@@ -64,8 +64,8 @@ name = "aep-client"
 version = "0.40.3"
 source = "git+https://github.com/beyond10x/aep?tag=0.40.3#52ca1ec48da9c744e2e551eab64f7cbad6ab7c3c"
 dependencies = [
- "aep-contract",
- "aep-domain",
+ "aep-contract 0.40.3",
+ "aep-domain 0.40.3",
  "schemars",
  "serde",
  "serde_json",
@@ -74,12 +74,35 @@ dependencies = [
 
 [[package]]
 name = "aep-contract"
+version = "0.32.1"
+source = "git+https://github.com/beyond10x/aep?tag=0.32.1#ea450dd63823e48ab2f3a60451d550e31a30bceb"
+dependencies = [
+ "aep-domain 0.32.1",
+ "schemars",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
+name = "aep-contract"
 version = "0.40.3"
 source = "git+https://github.com/beyond10x/aep?tag=0.40.3#52ca1ec48da9c744e2e551eab64f7cbad6ab7c3c"
 dependencies = [
- "aep-domain",
+ "aep-domain 0.40.3",
  "schemars",
  "serde",
+ "thiserror",
+]
+
+[[package]]
+name = "aep-domain"
+version = "0.32.1"
+source = "git+https://github.com/beyond10x/aep?tag=0.32.1#ea450dd63823e48ab2f3a60451d550e31a30bceb"
+dependencies = [
+ "proptest",
+ "schemars",
+ "serde",
+ "serde_json",
  "thiserror",
 ]
 
@@ -100,7 +123,7 @@ name = "aep-driver-spec"
 version = "0.40.3"
 source = "git+https://github.com/beyond10x/aep?tag=0.40.3#52ca1ec48da9c744e2e551eab64f7cbad6ab7c3c"
 dependencies = [
- "aep-domain",
+ "aep-domain 0.40.3",
  "schemars",
  "serde",
  "serde_json",
@@ -112,8 +135,8 @@ name = "aep-engine"
 version = "0.40.3"
 source = "git+https://github.com/beyond10x/aep?tag=0.40.3#52ca1ec48da9c744e2e551eab64f7cbad6ab7c3c"
 dependencies = [
- "aep-contract",
- "aep-domain",
+ "aep-contract 0.40.3",
+ "aep-domain 0.40.3",
  "serde",
  "thiserror",
 ]
@@ -123,7 +146,7 @@ name = "aep-project"
 version = "0.40.3"
 source = "git+https://github.com/beyond10x/aep?tag=0.40.3#52ca1ec48da9c744e2e551eab64f7cbad6ab7c3c"
 dependencies = [
- "aep-domain",
+ "aep-domain 0.40.3",
  "aep-driver-spec",
  "aep-engine",
  "aep-schema",
@@ -139,7 +162,7 @@ version = "0.40.3"
 source = "git+https://github.com/beyond10x/aep?tag=0.40.3#52ca1ec48da9c744e2e551eab64f7cbad6ab7c3c"
 dependencies = [
  "aep-backend-markdown",
- "aep-domain",
+ "aep-domain 0.40.3",
  "aep-driver-spec",
  "schemars",
  "serde",
@@ -154,8 +177,8 @@ name = "aep-service"
 version = "0.1.4"
 dependencies = [
  "aep-client",
- "aep-contract",
- "aep-domain",
+ "aep-contract 0.32.1",
+ "aep-domain 0.40.3",
  "aep-project",
  "aep-service-auth",
  "aep-service-http",
@@ -171,8 +194,8 @@ dependencies = [
 name = "aep-service-app"
 version = "0.1.4"
 dependencies = [
- "aep-contract",
- "aep-domain",
+ "aep-contract 0.32.1",
+ "aep-domain 0.40.3",
  "aep-service-auth",
 ]
 
@@ -180,7 +203,7 @@ dependencies = [
 name = "aep-service-auth"
 version = "0.1.4"
 dependencies = [
- "aep-domain",
+ "aep-domain 0.40.3",
 ]
 
 [[package]]
@@ -188,8 +211,8 @@ name = "aep-service-http"
 version = "0.1.4"
 dependencies = [
  "aep-client",
- "aep-contract",
- "aep-domain",
+ "aep-contract 0.32.1",
+ "aep-domain 0.40.3",
  "aep-service-app",
  "aep-service-auth",
  "serde",
@@ -200,8 +223,8 @@ name = "aep-service-openapi"
 version = "0.1.4"
 dependencies = [
  "aep-client",
- "aep-contract",
- "aep-domain",
+ "aep-contract 0.32.1",
+ "aep-domain 0.40.3",
  "schemars",
  "serde_json",
 ]
@@ -212,8 +235,8 @@ version = "0.1.4"
 dependencies = [
  "aep-backend-entity",
  "aep-backend-postgres",
- "aep-contract",
- "aep-domain",
+ "aep-contract 0.32.1",
+ "aep-domain 0.40.3",
  "aep-service-app",
  "aep-service-auth",
  "entity-core",
