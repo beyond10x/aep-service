@@ -1,0 +1,5855 @@
+{
+  "components": {
+    "schemas": {
+      "ActorRef": {
+        "description": "Who an action is attributed to: `human:alice`, `agent:x`, `service:y`, `system`.",
+        "pattern": "^(system|(human|agent|service):[A-Za-z0-9._@-]+)$",
+        "type": "string"
+      },
+      "ApprovalId": {
+        "description": "approval identifier.",
+        "maxLength": 200,
+        "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+        "type": "string"
+      },
+      "ArtifactStatus": {
+        "description": "Artifact status. The named vocabulary is listed in `examples`; any other name a lifecycle document declares is carried verbatim, so a rung is a line in a YAML file rather than a release of the engine.",
+        "examples": [
+          "draft",
+          "proposed",
+          "in_review",
+          "approved",
+          "accepted",
+          "rejected",
+          "active",
+          "implemented",
+          "superseded",
+          "archived"
+        ],
+        "pattern": "^[a-z][a-z0-9_-]*$",
+        "type": "string"
+      },
+      "AuditId": {
+        "description": "audit identifier.",
+        "maxLength": 200,
+        "pattern": "^[A-Za-z0-9]([A-Za-z0-9]|[./_-][A-Za-z0-9])*$",
+        "type": "string"
+      },
+      "AuditKind": {
+        "description": "What sort of thing an audit record reports.\n\nThe vocabulary is logical, not physical: an implementation may collapse or expand the records it actually stores as long as every kind here stays queryable.",
+        "oneOf": [
+          {
+            "description": "A command was submitted.",
+            "enum": [
+              "command_attempted"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "A command passed authorisation and validation.",
+            "enum": [
+              "command_accepted"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "A command was refused; nothing changed.",
+            "enum": [
+              "command_rejected"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "An entity came into existence.",
+            "enum": [
+              "entity_created"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "An entity changed.",
+            "enum": [
+              "entity_updated"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "An entity was archived; it remains addressable.",
+            "enum": [
+              "entity_archived"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "An entity was replaced by a newer one.",
+            "enum": [
+              "entity_superseded"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "A relation between two entities was created.",
+            "enum": [
+              "relation_created"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "A relation between two entities was removed.",
+            "enum": [
+              "relation_removed"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "The protocol engine decided whether something was permitted.",
+            "enum": [
+              "protocol_decision"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "An approval was asked for.",
+            "enum": [
+              "approval_requested"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "An approval was given.",
+            "enum": [
+              "approval_granted"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "An approval was refused.",
+            "enum": [
+              "approval_denied"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "A workflow transition was taken.",
+            "enum": [
+              "transition_performed"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "A workflow transition was evaluated and not permitted.",
+            "enum": [
+              "transition_blocked"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Evidence was recorded against a subject.",
+            "enum": [
+              "evidence_recorded"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "A verifier finished and reported an outcome.",
+            "enum": [
+              "verification_completed"
+            ],
+            "type": "string"
+          }
+        ]
+      },
+      "AuditQueryResponseV1": {
+        "additionalProperties": false,
+        "description": "A successful answered request.",
+        "properties": {
+          "request_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RequestId"
+              }
+            ],
+            "description": "Server-derived transport attempt identity."
+          },
+          "result": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PageV1_for_AuditRecord"
+              }
+            ],
+            "description": "The semantic result."
+          }
+        },
+        "required": [
+          "request_id",
+          "result"
+        ],
+        "title": "SuccessV1_for_PageV1_for_AuditRecord",
+        "type": "object"
+      },
+      "AuditQueryV1": {
+        "additionalProperties": false,
+        "description": "A strict version-1 audit query.",
+        "properties": {
+          "actor": {
+            "anyOf": [
+              {
+                "description": "Who an action is attributed to: `human:alice`, `agent:x`, `service:y`, `system`.",
+                "pattern": "^(system|(human|agent|service):[A-Za-z0-9._@-]+)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional authority filter."
+          },
+          "after": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional page cursor."
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "description": "command identifier.",
+                "maxLength": 200,
+                "pattern": "^[A-Za-z0-9]([A-Za-z0-9]|[./_-][A-Za-z0-9])*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional command filter."
+          },
+          "correlation_id": {
+            "anyOf": [
+              {
+                "description": "correlation identifier.",
+                "maxLength": 200,
+                "pattern": "^[A-Za-z0-9]([A-Za-z0-9]|[./_-][A-Za-z0-9])*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional correlation filter."
+          },
+          "entity": {
+            "anyOf": [
+              {
+                "description": "Opaque canonical identity of an entity; never interpreted.",
+                "pattern": "^[A-Za-z0-9_-]{12,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional subject filter."
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional audit-kind filter."
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "format": "uint",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional page size."
+          },
+          "rejected_only": {
+            "description": "Whether only refusals are returned.",
+            "type": "boolean"
+          },
+          "since": {
+            "anyOf": [
+              {
+                "format": "uint64",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional lower time bound."
+          },
+          "until": {
+            "anyOf": [
+              {
+                "format": "uint64",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional upper time bound."
+          }
+        },
+        "required": [
+          "actor",
+          "after",
+          "command_id",
+          "correlation_id",
+          "entity",
+          "kind",
+          "limit",
+          "rejected_only",
+          "since",
+          "until"
+        ],
+        "title": "AuditQueryV1",
+        "type": "object"
+      },
+      "AuditRecord": {
+        "description": "One immutable record in the audit trail.\n\nRecords are never updated in place. A correction is a new record that names the one it corrects through its [`CausationRef`], which is what makes the trail evidence rather than a mutable summary of someone's current opinion of the past.",
+        "properties": {
+          "actor": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ActorRef"
+              }
+            ],
+            "description": "On whose behalf it happened, and who bears responsibility."
+          },
+          "audit_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuditId"
+              }
+            ],
+            "description": "This record's identity."
+          },
+          "causation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CausationRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What directly caused it."
+          },
+          "change": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChangeRecord"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What changed. Absent whenever nothing did — in particular on every refusal."
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CommandId"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The logical command it belongs to; retries of one intent share it."
+          },
+          "correlation_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CorrelationId"
+              }
+            ],
+            "description": "Which broader activity it belongs to.\n\nMandatory, unlike everything else that links records together: a record nobody can reach from the activity it belongs to is a record nobody will ever read."
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionRecord"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Why it was allowed or refused."
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventId"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The domain event it belongs to."
+          },
+          "evidence": {
+            "description": "The evidence or approvals that justified it.",
+            "items": {
+              "$ref": "#/components/schemas/EntityId"
+            },
+            "type": "array"
+          },
+          "execution_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExecutionId"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The protocol execution that was active."
+          },
+          "executor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActorRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What actually ran, when that differs from who authorised it."
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuditKind"
+              }
+            ],
+            "description": "What sort of thing it reports."
+          },
+          "occurred_at": {
+            "description": "When it happened.",
+            "format": "uint64",
+            "minimum": 0.0,
+            "type": "integer"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RequestId"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The transport attempt it arrived on."
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EntityId"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What it was about."
+          },
+          "task": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TaskId"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The task the work belongs to."
+          }
+        },
+        "required": [
+          "actor",
+          "audit_id",
+          "correlation_id",
+          "kind",
+          "occurred_at"
+        ],
+        "type": "object"
+      },
+      "Capability": {
+        "description": "A semantic capability, such as `repository.write`, `network.read:private` or `deployment.create:staging`.",
+        "examples": [
+          "repository.read",
+          "repository.write",
+          "tests.execute",
+          "command.execute",
+          "network.write",
+          "telemetry.read",
+          "production.read",
+          "production.write",
+          "secret.read",
+          "artifact.read",
+          "artifact.write",
+          "planning.read",
+          "planning.write",
+          "review.request",
+          "approval.request",
+          "network.read",
+          "network.read:public",
+          "network.read:private",
+          "deployment.create:staging",
+          "deployment.rollback:production"
+        ],
+        "type": "string"
+      },
+      "CapabilityDecision": {
+        "description": "What a policy says about one capability.",
+        "oneOf": [
+          {
+            "description": "May be exercised.",
+            "enum": [
+              "allowed"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "May be exercised once a matching approval has been recorded.",
+            "enum": [
+              "requires_approval"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Explicitly forbidden; no grant can override this.",
+            "enum": [
+              "denied"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Not mentioned by the policy, and therefore not granted.",
+            "enum": [
+              "not_granted"
+            ],
+            "type": "string"
+          }
+        ]
+      },
+      "CausationRef": {
+        "description": "What directly caused this record.\n\nCausation and correlation answer different questions and are both needed. Correlation says *what belongs together* — one activity, one id, however many records. Causation says *what produced this one*, and chains: a command attempt causes a capability decision, the decision causes a denial, the denial causes an approval request. With only correlation the chain is a bag; with only causation there is no way to ask for the whole activity.",
+        "oneOf": [
+          {
+            "description": "A command caused this.",
+            "properties": {
+              "command": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CommandId"
+                  }
+                ],
+                "description": "Which command."
+              },
+              "kind": {
+                "enum": [
+                  "command"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "command",
+              "kind"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "An event caused this.",
+            "properties": {
+              "event": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EventId"
+                  }
+                ],
+                "description": "Which event."
+              },
+              "kind": {
+                "enum": [
+                  "event"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "event",
+              "kind"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "An earlier decision caused this, named by the audit record that carries it.",
+            "properties": {
+              "decision": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/AuditId"
+                  }
+                ],
+                "description": "Which audit record."
+              },
+              "kind": {
+                "enum": [
+                  "decision"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "decision",
+              "kind"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "An approval caused this.",
+            "properties": {
+              "approval": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ApprovalId"
+                  }
+                ],
+                "description": "Which approval."
+              },
+              "kind": {
+                "enum": [
+                  "approval"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "approval",
+              "kind"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "ChangeRecord": {
+        "description": "What changed, in a form the mutation can be reconstructed from.\n\nThe logical contract is only that \"what changed\" be recoverable: a backend may hold full revisions, patches, events or snapshots. What the record must carry is the entity, the revisions on either side of the change, and the command that caused it, so that a reader can go and fetch either side.\n\n# Redaction\n\nA payload may contain a secret, a customer's data or a credential, and auditability must not require storing any of it. So the payload is droppable — but nothing else is. Attribution (`actor`, `executor`), causality (`correlation_id`, `causation`), the entity and its revisions and the reason for redaction all survive, because they are what the audit is *for*: after redaction the trail can still say who did what to which entity and why the content is absent. A redaction that took the actor with it would answer nothing, and would make redaction a way to hide rather than a way to protect.",
+        "properties": {
+          "after": {
+            "description": "The revision after the change; absent when the entity no longer has a current revision.",
+            "format": "uint64",
+            "minimum": 0.0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "before": {
+            "description": "The revision before the change; absent when the entity did not exist yet.",
+            "format": "uint64",
+            "minimum": 0.0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "command": {
+            "description": "The name of the command that caused it, such as `design.approve`.\n\nHeld as a name rather than a typed command so that the audit model does not depend on the command vocabulary, which changes far more often than the audit trail's readers do.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "entity": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityId"
+              }
+            ],
+            "description": "Which entity changed."
+          },
+          "payload": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Node"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The command payload, when it may be stored."
+          },
+          "redacted": {
+            "default": false,
+            "description": "Whether the payload was withheld.\n\nDistinct from `payload: None`, which means there was nothing to record. This says there *was* a payload and it is deliberately not here.",
+            "type": "boolean"
+          },
+          "redaction_reason": {
+            "description": "Why the payload was withheld, such as `contains-credential`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "entity"
+        ],
+        "type": "object"
+      },
+      "Command": {
+        "description": "A state-changing operation.\n\nThe generic variants are the ones every entity type supports; the domain variants exist because their transitions carry conditions a field assignment cannot express. See the module documentation for why both kinds are needed.",
+        "oneOf": [
+          {
+            "description": "Create an entity.",
+            "properties": {
+              "command": {
+                "enum": [
+                  "create-entity"
+                ],
+                "type": "string"
+              },
+              "data": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Node"
+                  }
+                ],
+                "description": "The body, in whatever shape the entity type declares."
+              },
+              "entity_type": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityType"
+                  }
+                ],
+                "description": "What kind of entity it is, which decides its schema, lifecycle and permitted relations."
+              },
+              "locator": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityLocator"
+                  }
+                ],
+                "description": "The address it is to be known by."
+              }
+            },
+            "required": [
+              "command",
+              "data",
+              "entity_type",
+              "locator"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "Change an entity's ordinary mutable fields.",
+            "properties": {
+              "changes": {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/Node"
+                },
+                "description": "The fields to set, keyed by field name.",
+                "type": "object"
+              },
+              "command": {
+                "enum": [
+                  "update-entity"
+                ],
+                "type": "string"
+              },
+              "target": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityId"
+                  }
+                ],
+                "description": "The entity to change."
+              }
+            },
+            "required": [
+              "changes",
+              "command",
+              "target"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "Record a relation.",
+            "properties": {
+              "command": {
+                "enum": [
+                  "create-relation"
+                ],
+                "type": "string"
+              },
+              "kind": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/RelationKind"
+                  }
+                ],
+                "description": "What the edge means."
+              },
+              "source": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityId"
+                  }
+                ],
+                "description": "Where the edge starts; relation kinds are read source-first, `source specifies target`."
+              },
+              "target": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityId"
+                  }
+                ],
+                "description": "Where the edge ends."
+              }
+            },
+            "required": [
+              "command",
+              "kind",
+              "source",
+              "target"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "Remove a relation.",
+            "properties": {
+              "command": {
+                "enum": [
+                  "remove-relation"
+                ],
+                "type": "string"
+              },
+              "relation": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/RelationId"
+                  }
+                ],
+                "description": "The edge to remove."
+              }
+            },
+            "required": [
+              "command",
+              "relation"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "Take an entity out of active use.",
+            "properties": {
+              "command": {
+                "enum": [
+                  "archive-entity"
+                ],
+                "type": "string"
+              },
+              "reason": {
+                "description": "Why, recorded in the audit trail.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "target": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityId"
+                  }
+                ],
+                "description": "The entity to archive."
+              }
+            },
+            "required": [
+              "command",
+              "target"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "Replace an entity with a successor.",
+            "properties": {
+              "command": {
+                "enum": [
+                  "supersede-entity"
+                ],
+                "type": "string"
+              },
+              "reason": {
+                "description": "Why, recorded in the audit trail.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "successor": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityId"
+                  }
+                ],
+                "description": "What replaces it."
+              },
+              "target": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityId"
+                  }
+                ],
+                "description": "The entity being replaced."
+              }
+            },
+            "required": [
+              "command",
+              "successor",
+              "target"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "Ask for a review of a design revision.",
+            "properties": {
+              "command": {
+                "enum": [
+                  "submit-design-review"
+                ],
+                "type": "string"
+              },
+              "design": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/VersionedEntityRef"
+                  }
+                ],
+                "description": "The exact revision to be reviewed; a review of \"the design\" would not survive the next edit."
+              },
+              "reviewer": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ActorRef"
+                  }
+                ],
+                "description": "Who is asked."
+              }
+            },
+            "required": [
+              "command",
+              "design",
+              "reviewer"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "Approve a design revision.",
+            "properties": {
+              "command": {
+                "enum": [
+                  "approve-design"
+                ],
+                "type": "string"
+              },
+              "design": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/VersionedEntityRef"
+                  }
+                ],
+                "description": "The exact revision being approved."
+              },
+              "review": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityId"
+                  }
+                ],
+                "description": "The review that supports the approval."
+              }
+            },
+            "required": [
+              "command",
+              "design",
+              "review"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "Accept an architecture decision record.",
+            "properties": {
+              "adr": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/VersionedEntityRef"
+                  }
+                ],
+                "description": "The exact revision being accepted."
+              },
+              "command": {
+                "enum": [
+                  "accept-adr"
+                ],
+                "type": "string"
+              },
+              "supersedes": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityId"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The decision this one reverses, when it reverses one.\n\nCarried on the acceptance rather than issued as a separate [`SupersedeEntity`] because the two facts are one decision: an ADR that supersedes another does so *by being accepted*, and splitting it in two leaves a window in which both are current."
+              }
+            },
+            "required": [
+              "adr",
+              "command"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "Move an artifact along its declared status ladder.",
+            "properties": {
+              "command": {
+                "enum": [
+                  "move-status"
+                ],
+                "type": "string"
+              },
+              "decided_on": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/Node"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The account of what the decision rested on, as the caller recorded it.\n\nCarried as data rather than as a type, because the shape belongs to whatever recorded it — a store's journal, an audit trail — and the command vocabulary is not the place to fix one. What matters here is that it **travels with the move**: the difference between a status somebody asserted the evidence for and one a record established is the difference `story:completion-needs-evidence` exists over, and a move that arrived without its account would lose it silently."
+              },
+              "expected_revision": {
+                "description": "The revision the caller expected, when it stated one.",
+                "format": "uint64",
+                "minimum": 0.0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "target": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityId"
+                  }
+                ],
+                "description": "Which artifact."
+              },
+              "to": {
+                "description": "The status it moved to, as the kind's ladder spells it.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "command",
+              "target",
+              "to"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "Record an observation about an artifact.",
+            "properties": {
+              "command": {
+                "enum": [
+                  "record-evidence"
+                ],
+                "type": "string"
+              },
+              "kind": {
+                "description": "What kind of observation it is.",
+                "type": "string"
+              },
+              "reference": {
+                "description": "What it points at — a run, a digest, a suite's own words.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source": {
+                "description": "Where it came from, as the recorder is willing to say.",
+                "type": "string"
+              },
+              "target": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EntityId"
+                  }
+                ],
+                "description": "Which artifact the observation is about."
+              }
+            },
+            "required": [
+              "command",
+              "kind",
+              "source",
+              "target"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "CommandDescriptor": {
+        "additionalProperties": false,
+        "description": "A command this type accepts.",
+        "properties": {
+          "command_type": {
+            "description": "Its versioned wire name, such as `aep.design.approve/v1`.",
+            "type": "string"
+          },
+          "revision_guarded": {
+            "description": "Whether it asserts a revision, and so cannot silently overwrite.",
+            "type": "boolean"
+          },
+          "summary": {
+            "description": "What it does, in one line.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "command_type",
+          "revision_guarded",
+          "summary"
+        ],
+        "type": "object"
+      },
+      "CommandId": {
+        "description": "command identifier.",
+        "maxLength": 200,
+        "pattern": "^[A-Za-z0-9]([A-Za-z0-9]|[./_-][A-Za-z0-9])*$",
+        "type": "string"
+      },
+      "CommandOutcome": {
+        "description": "How a command was applied.",
+        "oneOf": [
+          {
+            "description": "Applied for the first time.",
+            "enum": [
+              "accepted"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Recognised as a replay of a command already applied; the original result is returned.",
+            "enum": [
+              "replayed"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Accepted, and nothing changed — the state already matched.",
+            "enum": [
+              "no_op"
+            ],
+            "type": "string"
+          }
+        ]
+      },
+      "CommandRequestV1": {
+        "additionalProperties": false,
+        "description": "A version-1 command request before the server adds trusted context.",
+        "properties": {
+          "causation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The direct cause, explicitly null when absent."
+          },
+          "command_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CommandId"
+              }
+            ],
+            "description": "The logical command identity."
+          },
+          "command_type": {
+            "description": "The versioned semantic command name.",
+            "type": "string"
+          },
+          "correlation_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CorrelationId"
+              }
+            ],
+            "description": "The wider activity."
+          },
+          "execution_id": {
+            "anyOf": [
+              {
+                "description": "execution identifier.",
+                "maxLength": 200,
+                "pattern": "^[A-Za-z0-9]([A-Za-z0-9]|[./_-][A-Za-z0-9])*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The protocol execution, explicitly null when absent."
+          },
+          "expected_revision": {
+            "anyOf": [
+              {
+                "format": "uint64",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The asserted revision, explicitly null when absent."
+          },
+          "idempotency_key": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IdempotencyKey"
+              }
+            ],
+            "description": "The authority-scoped idempotency identity."
+          },
+          "payload": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Command"
+              }
+            ],
+            "description": "The raw semantic command document."
+          },
+          "target": {
+            "anyOf": [
+              {
+                "description": "Opaque canonical identity of an entity; never interpreted.",
+                "pattern": "^[A-Za-z0-9_-]{12,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The command target, explicitly null when absent."
+          },
+          "task": {
+            "anyOf": [
+              {
+                "description": "task identifier.",
+                "maxLength": 200,
+                "pattern": "^[A-Za-z0-9]([A-Za-z0-9]|[./_-][A-Za-z0-9])*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The governed task, explicitly null when absent."
+          }
+        },
+        "required": [
+          "causation",
+          "command_id",
+          "command_type",
+          "correlation_id",
+          "execution_id",
+          "expected_revision",
+          "idempotency_key",
+          "payload",
+          "target",
+          "task"
+        ],
+        "title": "CommandRequestV1",
+        "type": "object"
+      },
+      "CommandResponseV1": {
+        "additionalProperties": false,
+        "description": "A successful answered request.",
+        "properties": {
+          "request_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RequestId"
+              }
+            ],
+            "description": "Server-derived transport attempt identity."
+          },
+          "result": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CommandResultV1"
+              }
+            ],
+            "description": "The semantic result."
+          }
+        },
+        "required": [
+          "request_id",
+          "result"
+        ],
+        "title": "SuccessV1_for_CommandResultV1",
+        "type": "object"
+      },
+      "CommandResultV1": {
+        "additionalProperties": false,
+        "description": "A command result whose empty collections are still written on the wire.",
+        "properties": {
+          "affected": {
+            "description": "Entities affected by the command.",
+            "items": {
+              "$ref": "#/components/schemas/VersionedEntityRef"
+            },
+            "type": "array"
+          },
+          "audit": {
+            "description": "Audit records emitted by the command.",
+            "items": {
+              "$ref": "#/components/schemas/AuditId"
+            },
+            "type": "array"
+          },
+          "command_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CommandId"
+              }
+            ],
+            "description": "The logical command identity."
+          },
+          "consistency": {
+            "description": "Token a subsequent read may demand.",
+            "type": "string"
+          },
+          "events": {
+            "description": "Events emitted by the command.",
+            "items": {
+              "$ref": "#/components/schemas/EventId"
+            },
+            "type": "array"
+          },
+          "outcome": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CommandOutcome"
+              }
+            ],
+            "description": "Whether this was the first application, a replay or a no-op."
+          }
+        },
+        "required": [
+          "affected",
+          "audit",
+          "command_id",
+          "consistency",
+          "events",
+          "outcome"
+        ],
+        "type": "object"
+      },
+      "CorrelationId": {
+        "description": "correlation identifier.",
+        "maxLength": 200,
+        "pattern": "^[A-Za-z0-9]([A-Za-z0-9]|[./_-][A-Za-z0-9])*$",
+        "type": "string"
+      },
+      "DecisionRecord": {
+        "description": "Why the protocol allowed or refused something, in a form a person can read back.\n\nThis is the shape a refusal takes in the trail. \"Denied\" on its own is unusable six months later: the reader needs the operation that was attempted, the rule that refused it, what was missing, and the state the execution was in — because the same operation is often allowed one state later, and the record has to make that visible.",
+        "properties": {
+          "allowed": {
+            "description": "Whether the action was permitted.",
+            "type": "boolean"
+          },
+          "capability": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Capability"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The capability it needed, when the decision was a capability decision."
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CapabilityDecision"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What the resolved policy said about that capability."
+          },
+          "missing": {
+            "description": "What was missing, such as `approval:production-change`.\n\nThis is the \"what would have stopped it\" half of the record: it tells a reader what to obtain in order to make the same attempt succeed.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "operation": {
+            "description": "What was attempted, such as `production.write`.",
+            "type": "string"
+          },
+          "rule": {
+            "description": "The named rule that decided it, such as `production-write-requires-approval`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PolicySource"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Which document decided it.\n\nThis also carries \"which principle refused this\": [`PolicySource::Principle`] names it, so the record does not need a separate principle field."
+          },
+          "state": {
+            "description": "The workflow state the execution was in when the decision was made.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "allowed",
+          "operation"
+        ],
+        "type": "object"
+      },
+      "EntityId": {
+        "description": "Opaque canonical identity of an entity; never interpreted.",
+        "pattern": "^[A-Za-z0-9_-]{12,128}$",
+        "type": "string"
+      },
+      "EntityLocator": {
+        "description": "Logical address of an entity: `ep://<organisation>/<space>/<kind>/<key>`. Not a storage URL.",
+        "pattern": "^ep://[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$",
+        "type": "string"
+      },
+      "EntityMetadata": {
+        "additionalProperties": false,
+        "description": "What every entity carries, whatever its type.",
+        "properties": {
+          "created_at": {
+            "description": "When it was created.",
+            "format": "uint64",
+            "minimum": 0.0,
+            "type": "integer"
+          },
+          "id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityId"
+              }
+            ],
+            "description": "Canonical identity."
+          },
+          "locator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityLocator"
+              }
+            ],
+            "description": "Logical address."
+          },
+          "provenance": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityProvenance"
+              }
+            ],
+            "description": "Who made it and who changed it."
+          },
+          "revision": {
+            "description": "How many times it has changed.",
+            "format": "uint64",
+            "minimum": 0.0,
+            "type": "integer"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityType"
+              }
+            ],
+            "description": "Versioned type."
+          },
+          "updated_at": {
+            "description": "When it last changed.",
+            "format": "uint64",
+            "minimum": 0.0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "created_at",
+          "id",
+          "locator",
+          "provenance",
+          "revision",
+          "type",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "EntityProvenance": {
+        "additionalProperties": false,
+        "description": "How an entity came to exist and change.",
+        "properties": {
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ActorRef"
+              }
+            ],
+            "description": "Who created it."
+          },
+          "created_executor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActorRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What ran, when that differs from who authorised it."
+          },
+          "source_revision": {
+            "description": "The source revision it describes, for generated entities.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updated_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ActorRef"
+              }
+            ],
+            "description": "Who changed it last."
+          },
+          "updated_executor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActorRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What ran for the last change."
+          }
+        },
+        "required": [
+          "created_by",
+          "updated_by"
+        ],
+        "type": "object"
+      },
+      "EntityQueryResponseV1": {
+        "additionalProperties": false,
+        "description": "A successful answered request.",
+        "properties": {
+          "request_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RequestId"
+              }
+            ],
+            "description": "Server-derived transport attempt identity."
+          },
+          "result": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PageV1_for_Entity_for_Node"
+              }
+            ],
+            "description": "The semantic result."
+          }
+        },
+        "required": [
+          "request_id",
+          "result"
+        ],
+        "title": "SuccessV1_for_PageV1_for_Entity_for_Node",
+        "type": "object"
+      },
+      "EntityQueryV1": {
+        "additionalProperties": false,
+        "description": "A strict version-1 entity query.",
+        "properties": {
+          "after": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional page cursor."
+          },
+          "consistency": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QueryConsistency"
+              }
+            ],
+            "description": "Required consistency requirement."
+          },
+          "entity_type": {
+            "anyOf": [
+              {
+                "description": "A versioned entity type, written `<namespace>.<name>/v<version>`.",
+                "examples": [
+                  "aep.design/v1",
+                  "aep.story/v1",
+                  "aop.incident/v1"
+                ],
+                "pattern": "^[a-z0-9][a-z0-9.-]*\\.[a-z0-9-]+/v[1-9][0-9]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional type filter."
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "format": "uint",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional page size."
+          },
+          "matching": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Node"
+            },
+            "description": "Exact body-field filters.",
+            "type": "object"
+          },
+          "organisation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional organisation filter."
+          },
+          "related_to": {
+            "anyOf": [
+              {
+                "description": "Opaque canonical identity of an entity; never interpreted.",
+                "pattern": "^[A-Za-z0-9_-]{12,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional related entity."
+          },
+          "relation": {
+            "anyOf": [
+              {
+                "description": "The meaning of an edge in the artifact graph.",
+                "oneOf": [
+                  {
+                    "description": "Shaped by, without being derived from.",
+                    "enum": [
+                      "informed_by"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Produced from a higher-level artifact.",
+                    "enum": [
+                      "derived_from"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Breaks a larger artifact into smaller work.",
+                    "enum": [
+                      "decomposes"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "States the required behaviour of something.",
+                    "enum": [
+                      "specifies"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Proposes how to satisfy something.",
+                    "enum": [
+                      "designs"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Realises something in the system.",
+                    "enum": [
+                      "implements"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Records a decision taken within something.",
+                    "enum": [
+                      "decides"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Assesses something.",
+                    "enum": [
+                      "reviews"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Establishes that something holds.",
+                    "enum": [
+                      "verifies"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Prevents progress on something.",
+                    "enum": [
+                      "blocks"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Needs something else first.",
+                    "enum": [
+                      "depends_on"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Replaces something.",
+                    "enum": [
+                      "supersedes"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Produces the outcome something asked for.",
+                    "enum": [
+                      "delivers"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Moves an objective the collection has set — a `vision` artifact — and says which.",
+                    "enum": [
+                      "serves"
+                    ],
+                    "type": "string"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional relation kind."
+          },
+          "space": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional space filter."
+          }
+        },
+        "required": [
+          "after",
+          "consistency",
+          "entity_type",
+          "limit",
+          "matching",
+          "organisation",
+          "related_to",
+          "relation",
+          "space"
+        ],
+        "title": "EntityQueryV1",
+        "type": "object"
+      },
+      "EntityResponseV1": {
+        "additionalProperties": false,
+        "description": "A successful answered request.",
+        "properties": {
+          "request_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RequestId"
+              }
+            ],
+            "description": "Server-derived transport attempt identity."
+          },
+          "result": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Entity_for_Node"
+              }
+            ],
+            "description": "The semantic result."
+          }
+        },
+        "required": [
+          "request_id",
+          "result"
+        ],
+        "title": "SuccessV1_for_Entity_for_Node",
+        "type": "object"
+      },
+      "EntityType": {
+        "description": "A versioned entity type, written `<namespace>.<name>/v<version>`.",
+        "examples": [
+          "aep.design/v1",
+          "aep.story/v1",
+          "aop.incident/v1"
+        ],
+        "pattern": "^[a-z0-9][a-z0-9.-]*\\.[a-z0-9-]+/v[1-9][0-9]*$",
+        "type": "string"
+      },
+      "Entity_for_Node": {
+        "additionalProperties": false,
+        "description": "An entity: metadata plus its typed body.",
+        "properties": {
+          "data": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Node"
+              }
+            ],
+            "description": "What this type carries."
+          },
+          "metadata": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityMetadata"
+              }
+            ],
+            "description": "What every entity carries."
+          }
+        },
+        "required": [
+          "data",
+          "metadata"
+        ],
+        "type": "object"
+      },
+      "EventId": {
+        "description": "event identifier.",
+        "maxLength": 200,
+        "pattern": "^[A-Za-z0-9]([A-Za-z0-9]|[./_-][A-Za-z0-9])*$",
+        "type": "string"
+      },
+      "EvidenceKind": {
+        "description": "A kind of evidence. The canonical names come first; the rest are older spellings still accepted.",
+        "enum": [
+          "test_result",
+          "static_analysis",
+          "contract_result",
+          "property_test_result",
+          "deployment_result",
+          "metric_observation",
+          "health_observation",
+          "approval",
+          "diff",
+          "artifact",
+          "review",
+          "verification",
+          "specification",
+          "ess_conformance",
+          "trace_conformance",
+          "test_execution",
+          "source_diff",
+          "artifact_evidence",
+          "review_result",
+          "verification_record",
+          "specification_record",
+          "ess_conformance_result"
+        ],
+        "type": "string"
+      },
+      "ExecutionId": {
+        "description": "execution identifier.",
+        "maxLength": 200,
+        "pattern": "^[A-Za-z0-9]([A-Za-z0-9]|[./_-][A-Za-z0-9])*$",
+        "type": "string"
+      },
+      "HistoryQueryResponseV2": {
+        "additionalProperties": false,
+        "description": "A successful answered request.",
+        "properties": {
+          "request_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RequestId"
+              }
+            ],
+            "description": "Server-derived transport attempt identity."
+          },
+          "result": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PageV2_for_RevisionRecord"
+              }
+            ],
+            "description": "The semantic result."
+          }
+        },
+        "required": [
+          "request_id",
+          "result"
+        ],
+        "title": "SuccessV1_for_PageV2_for_RevisionRecord",
+        "type": "object"
+      },
+      "HistoryQueryV2": {
+        "additionalProperties": false,
+        "description": "A strict version-2 bounded history request.",
+        "properties": {
+          "after": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Continuation, explicitly null for the first page."
+          },
+          "consistency": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QueryConsistency"
+              }
+            ],
+            "description": "Required consistency demand."
+          },
+          "entity": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityId"
+              }
+            ],
+            "description": "Entity whose revisions are requested."
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "format": "uint",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Maximum records, explicitly null for the server default."
+          }
+        },
+        "required": [
+          "after",
+          "consistency",
+          "entity",
+          "limit"
+        ],
+        "title": "HistoryQueryV2",
+        "type": "object"
+      },
+      "HistoryResponseV1": {
+        "additionalProperties": false,
+        "description": "A successful answered request.",
+        "properties": {
+          "request_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RequestId"
+              }
+            ],
+            "description": "Server-derived transport attempt identity."
+          },
+          "result": {
+            "description": "The semantic result.",
+            "items": {
+              "$ref": "#/components/schemas/RevisionRecord"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "request_id",
+          "result"
+        ],
+        "title": "SuccessV1_for_Array_of_RevisionRecord",
+        "type": "object"
+      },
+      "IdempotencyKey": {
+        "description": "idempotency key identifier.",
+        "maxLength": 200,
+        "pattern": "^[A-Za-z0-9]([A-Za-z0-9]|[./_-][A-Za-z0-9])*$",
+        "type": "string"
+      },
+      "LifecycleDescriptor": {
+        "additionalProperties": false,
+        "description": "What a type's lifecycle allows.",
+        "properties": {
+          "initial": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ArtifactStatus"
+              }
+            ],
+            "description": "Where a new one starts."
+          },
+          "requires": {
+            "description": "Which rungs cost evidence, and of which kind, how many — `to -> [(kind, at_least)]`.\n\nEmpty for a ladder that only says which moves are legal. A harness that reads this knows before it asks that `implemented` needs a `test_result`, which is the whole of gap-register `:39` read from the far side.",
+            "items": {
+              "items": [
+                {
+                  "$ref": "#/components/schemas/ArtifactStatus"
+                },
+                {
+                  "items": {
+                    "items": [
+                      {
+                        "$ref": "#/components/schemas/EvidenceKind"
+                      },
+                      {
+                        "format": "uint",
+                        "minimum": 0.0,
+                        "type": "integer"
+                      }
+                    ],
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "type": "array"
+                  },
+                  "type": "array"
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "statuses": {
+            "description": "Every status it may hold.",
+            "items": {
+              "$ref": "#/components/schemas/ArtifactStatus"
+            },
+            "type": "array"
+          },
+          "transitions": {
+            "description": "Which moves are legal, as `from -> [to]`.",
+            "items": {
+              "items": [
+                {
+                  "$ref": "#/components/schemas/ArtifactStatus"
+                },
+                {
+                  "items": {
+                    "$ref": "#/components/schemas/ArtifactStatus"
+                  },
+                  "type": "array"
+                }
+              ],
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "initial",
+          "statuses",
+          "transitions"
+        ],
+        "type": "object"
+      },
+      "Node": {
+        "description": "Any JSON/YAML value: null, boolean, number, string, array or object."
+      },
+      "PageV1_for_AuditRecord": {
+        "additionalProperties": false,
+        "description": "A page whose nullable continuation member is always present.",
+        "properties": {
+          "items": {
+            "description": "Page items.",
+            "items": {
+              "$ref": "#/components/schemas/AuditRecord"
+            },
+            "type": "array"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Continuation cursor, explicitly null on the last page."
+          }
+        },
+        "required": [
+          "items",
+          "next"
+        ],
+        "type": "object"
+      },
+      "PageV1_for_Entity_for_Node": {
+        "additionalProperties": false,
+        "description": "A page whose nullable continuation member is always present.",
+        "properties": {
+          "items": {
+            "description": "Page items.",
+            "items": {
+              "$ref": "#/components/schemas/Entity_for_Node"
+            },
+            "type": "array"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Continuation cursor, explicitly null on the last page."
+          }
+        },
+        "required": [
+          "items",
+          "next"
+        ],
+        "type": "object"
+      },
+      "PageV1_for_Relation": {
+        "additionalProperties": false,
+        "description": "A page whose nullable continuation member is always present.",
+        "properties": {
+          "items": {
+            "description": "Page items.",
+            "items": {
+              "$ref": "#/components/schemas/Relation"
+            },
+            "type": "array"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Continuation cursor, explicitly null on the last page."
+          }
+        },
+        "required": [
+          "items",
+          "next"
+        ],
+        "type": "object"
+      },
+      "PageV2_for_RevisionRecord": {
+        "additionalProperties": false,
+        "description": "A strict version-2 page. The shape is named separately so later versions never reinterpret v1.",
+        "properties": {
+          "items": {
+            "description": "Page items.",
+            "items": {
+              "$ref": "#/components/schemas/RevisionRecord"
+            },
+            "type": "array"
+          },
+          "next": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Continuation, explicitly null when complete."
+          }
+        },
+        "required": [
+          "items",
+          "next"
+        ],
+        "type": "object"
+      },
+      "PolicySource": {
+        "description": "Which document contributed a policy entry, so a denial can be explained.",
+        "oneOf": [
+          {
+            "description": "The protocol's own vocabulary declaration.",
+            "properties": {
+              "protocol": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ProtocolId"
+                  }
+                ],
+                "description": "The protocol."
+              },
+              "source": {
+                "enum": [
+                  "protocol"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "protocol",
+              "source"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "A profile.",
+            "properties": {
+              "profile": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ProfileId"
+                  }
+                ],
+                "description": "The profile."
+              },
+              "source": {
+                "enum": [
+                  "profile"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "profile",
+              "source"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "A principle.",
+            "properties": {
+              "principle": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PrincipleId"
+                  }
+                ],
+                "description": "The principle."
+              },
+              "source": {
+                "enum": [
+                  "principle"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "principle",
+              "source"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "The task's own constraints.",
+            "properties": {
+              "source": {
+                "enum": [
+                  "task"
+                ],
+                "type": "string"
+              },
+              "task": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TaskId"
+                  }
+                ],
+                "description": "The task."
+              }
+            },
+            "required": [
+              "source",
+              "task"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "A workflow state's override.",
+            "properties": {
+              "source": {
+                "enum": [
+                  "state"
+                ],
+                "type": "string"
+              },
+              "state": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/StateId"
+                  }
+                ],
+                "description": "The state."
+              }
+            },
+            "required": [
+              "source",
+              "state"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "PrincipleId": {
+        "description": "principle identifier.",
+        "maxLength": 200,
+        "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+        "type": "string"
+      },
+      "ProblemDocumentV1": {
+        "additionalProperties": false,
+        "description": "A stable failure document.",
+        "properties": {
+          "error": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProblemV1"
+              }
+            ],
+            "description": "The typed problem."
+          },
+          "request_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RequestId"
+              }
+            ],
+            "description": "Server-derived transport attempt identity."
+          }
+        },
+        "required": [
+          "error",
+          "request_id"
+        ],
+        "title": "ProblemDocumentV1",
+        "type": "object"
+      },
+      "ProblemV1": {
+        "additionalProperties": false,
+        "description": "A stable failure and safe structured details selected by its code.",
+        "properties": {
+          "code": {
+            "description": "Stable machine-readable code.",
+            "type": "string"
+          },
+          "details": {
+            "description": "Code-specific safe details, validated when mapped to the semantic error."
+          },
+          "message": {
+            "description": "Diagnostic text, not a machine contract.",
+            "type": "string"
+          },
+          "retryable": {
+            "description": "Whether retrying unchanged intent may succeed later.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "details",
+          "message",
+          "retryable"
+        ],
+        "type": "object"
+      },
+      "ProfileId": {
+        "description": "profile identifier.",
+        "maxLength": 200,
+        "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*(([./][a-z0-9]+(-[a-z0-9]+)*)*[./]([a-z0-9]*[a-z][a-z0-9]*(-[a-z0-9]+)*|[0-9]+(-[a-z0-9]+)+))?$",
+        "type": "string"
+      },
+      "ProtocolId": {
+        "description": "protocol identifier.",
+        "maxLength": 200,
+        "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+        "type": "string"
+      },
+      "QueryConsistency": {
+        "description": "How fresh a read has to be.",
+        "oneOf": [
+          {
+            "description": "Whatever the backend has now. The default, and the cheap one.",
+            "properties": {
+              "consistency": {
+                "enum": [
+                  "current"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "consistency"
+            ],
+            "type": "object"
+          },
+          {
+            "description": "A view no older than the successful command that produced this token.",
+            "properties": {
+              "consistency": {
+                "enum": [
+                  "at_least"
+                ],
+                "type": "string"
+              },
+              "token": {
+                "description": "The token that mutation returned.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "consistency",
+              "token"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "Relation": {
+        "additionalProperties": false,
+        "description": "A relation in the entity graph.",
+        "properties": {
+          "created_at": {
+            "description": "When it was created.",
+            "format": "uint64",
+            "minimum": 0.0,
+            "type": "integer"
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ActorRef"
+              }
+            ],
+            "description": "Who created it."
+          },
+          "id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RelationId"
+              }
+            ],
+            "description": "Its identity, so it can be removed by name."
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RelationKind"
+              }
+            ],
+            "description": "What the edge means."
+          },
+          "source": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityId"
+              }
+            ],
+            "description": "Where it starts."
+          },
+          "target": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityId"
+              }
+            ],
+            "description": "Where it points."
+          }
+        },
+        "required": [
+          "created_at",
+          "created_by",
+          "id",
+          "kind",
+          "source",
+          "target"
+        ],
+        "type": "object"
+      },
+      "RelationDescriptor": {
+        "additionalProperties": false,
+        "description": "A relation this type may have.",
+        "properties": {
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RelationKind"
+              }
+            ],
+            "description": "Which relation."
+          },
+          "required": {
+            "default": false,
+            "description": "Whether the relation is required for the entity to be usable.",
+            "type": "boolean"
+          },
+          "target_types": {
+            "description": "What it may point at.",
+            "items": {
+              "$ref": "#/components/schemas/EntityType"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "kind",
+          "target_types"
+        ],
+        "type": "object"
+      },
+      "RelationId": {
+        "description": "relation identifier.",
+        "maxLength": 200,
+        "pattern": "^[A-Za-z0-9]([A-Za-z0-9]|[./_-][A-Za-z0-9])*$",
+        "type": "string"
+      },
+      "RelationKind": {
+        "description": "The meaning of an edge in the artifact graph.",
+        "oneOf": [
+          {
+            "description": "Shaped by, without being derived from.",
+            "enum": [
+              "informed_by"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Produced from a higher-level artifact.",
+            "enum": [
+              "derived_from"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Breaks a larger artifact into smaller work.",
+            "enum": [
+              "decomposes"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "States the required behaviour of something.",
+            "enum": [
+              "specifies"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Proposes how to satisfy something.",
+            "enum": [
+              "designs"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Realises something in the system.",
+            "enum": [
+              "implements"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Records a decision taken within something.",
+            "enum": [
+              "decides"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Assesses something.",
+            "enum": [
+              "reviews"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Establishes that something holds.",
+            "enum": [
+              "verifies"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Prevents progress on something.",
+            "enum": [
+              "blocks"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Needs something else first.",
+            "enum": [
+              "depends_on"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Replaces something.",
+            "enum": [
+              "supersedes"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Produces the outcome something asked for.",
+            "enum": [
+              "delivers"
+            ],
+            "type": "string"
+          },
+          {
+            "description": "Moves an objective the collection has set — a `vision` artifact — and says which.",
+            "enum": [
+              "serves"
+            ],
+            "type": "string"
+          }
+        ]
+      },
+      "RelationQueryResponseV1": {
+        "additionalProperties": false,
+        "description": "A successful answered request.",
+        "properties": {
+          "request_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RequestId"
+              }
+            ],
+            "description": "Server-derived transport attempt identity."
+          },
+          "result": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PageV1_for_Relation"
+              }
+            ],
+            "description": "The semantic result."
+          }
+        },
+        "required": [
+          "request_id",
+          "result"
+        ],
+        "title": "SuccessV1_for_PageV1_for_Relation",
+        "type": "object"
+      },
+      "RelationQueryV1": {
+        "additionalProperties": false,
+        "description": "A strict version-1 relation query.",
+        "properties": {
+          "after": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional page cursor."
+          },
+          "consistency": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QueryConsistency"
+              }
+            ],
+            "description": "Required consistency requirement."
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "description": "The meaning of an edge in the artifact graph.",
+                "oneOf": [
+                  {
+                    "description": "Shaped by, without being derived from.",
+                    "enum": [
+                      "informed_by"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Produced from a higher-level artifact.",
+                    "enum": [
+                      "derived_from"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Breaks a larger artifact into smaller work.",
+                    "enum": [
+                      "decomposes"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "States the required behaviour of something.",
+                    "enum": [
+                      "specifies"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Proposes how to satisfy something.",
+                    "enum": [
+                      "designs"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Realises something in the system.",
+                    "enum": [
+                      "implements"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Records a decision taken within something.",
+                    "enum": [
+                      "decides"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Assesses something.",
+                    "enum": [
+                      "reviews"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Establishes that something holds.",
+                    "enum": [
+                      "verifies"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Prevents progress on something.",
+                    "enum": [
+                      "blocks"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Needs something else first.",
+                    "enum": [
+                      "depends_on"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Replaces something.",
+                    "enum": [
+                      "supersedes"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Produces the outcome something asked for.",
+                    "enum": [
+                      "delivers"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "description": "Moves an objective the collection has set — a `vision` artifact — and says which.",
+                    "enum": [
+                      "serves"
+                    ],
+                    "type": "string"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional relation-kind filter."
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "format": "uint",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional page size."
+          },
+          "source": {
+            "anyOf": [
+              {
+                "description": "Opaque canonical identity of an entity; never interpreted.",
+                "pattern": "^[A-Za-z0-9_-]{12,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional source filter."
+          },
+          "target": {
+            "anyOf": [
+              {
+                "description": "Opaque canonical identity of an entity; never interpreted.",
+                "pattern": "^[A-Za-z0-9_-]{12,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional target filter."
+          }
+        },
+        "required": [
+          "after",
+          "consistency",
+          "kind",
+          "limit",
+          "source",
+          "target"
+        ],
+        "title": "RelationQueryV1",
+        "type": "object"
+      },
+      "RequestId": {
+        "description": "request identifier.",
+        "maxLength": 200,
+        "pattern": "^[A-Za-z0-9]([A-Za-z0-9]|[./_-][A-Za-z0-9])*$",
+        "type": "string"
+      },
+      "ResolveRequestV1": {
+        "additionalProperties": false,
+        "description": "A logical-address resolution request.",
+        "properties": {
+          "locator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityLocator"
+              }
+            ],
+            "description": "The logical entity address."
+          }
+        },
+        "required": [
+          "locator"
+        ],
+        "title": "ResolveRequestV1",
+        "type": "object"
+      },
+      "ResolveResponseV1": {
+        "additionalProperties": false,
+        "description": "A successful answered request.",
+        "properties": {
+          "request_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RequestId"
+              }
+            ],
+            "description": "Server-derived transport attempt identity."
+          },
+          "result": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityId"
+              }
+            ],
+            "description": "The semantic result."
+          }
+        },
+        "required": [
+          "request_id",
+          "result"
+        ],
+        "title": "SuccessV1_for_EntityId",
+        "type": "object"
+      },
+      "RevisionRecord": {
+        "additionalProperties": false,
+        "description": "One step in an entity's history.",
+        "properties": {
+          "actor": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ActorRef"
+              }
+            ],
+            "description": "Who authorised it."
+          },
+          "at": {
+            "description": "When it happened.",
+            "format": "uint64",
+            "minimum": 0.0,
+            "type": "integer"
+          },
+          "audit_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuditId"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The audit record covering it."
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CommandId"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The command that produced it."
+          },
+          "executor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActorRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What ran, when that differs."
+          },
+          "revision": {
+            "description": "Which revision this describes.",
+            "format": "uint64",
+            "minimum": 0.0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "actor",
+          "at",
+          "revision"
+        ],
+        "type": "object"
+      },
+      "StateId": {
+        "description": "state identifier.",
+        "maxLength": 200,
+        "pattern": "^[a-z][a-z0-9]*([-_][a-z0-9]+)*(([./][a-z0-9]+([-_][a-z0-9]+)*)*[./]([a-z0-9]*[a-z][a-z0-9]*([-_][a-z0-9]+)*|[0-9]+([-_][a-z0-9]+)+))?$",
+        "type": "string"
+      },
+      "TaskId": {
+        "description": "task identifier.",
+        "maxLength": 200,
+        "pattern": "^[A-Za-z0-9]([A-Za-z0-9]|[./_-][A-Za-z0-9])*$",
+        "type": "string"
+      },
+      "TypeDescriptionResponseV1": {
+        "additionalProperties": false,
+        "description": "A successful answered request.",
+        "properties": {
+          "request_id": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RequestId"
+              }
+            ],
+            "description": "Server-derived transport attempt identity."
+          },
+          "result": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TypeDescriptor"
+              }
+            ],
+            "description": "The semantic result."
+          }
+        },
+        "required": [
+          "request_id",
+          "result"
+        ],
+        "title": "SuccessV1_for_TypeDescriptor",
+        "type": "object"
+      },
+      "TypeDescriptor": {
+        "additionalProperties": false,
+        "description": "Everything a harness needs in order to work with a type it has never seen.",
+        "properties": {
+          "commands": {
+            "description": "The commands that may target it.",
+            "items": {
+              "$ref": "#/components/schemas/CommandDescriptor"
+            },
+            "type": "array"
+          },
+          "entity_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntityType"
+              }
+            ],
+            "description": "Which type this describes."
+          },
+          "lifecycle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LifecycleDescriptor"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Its lifecycle, for types that have one."
+          },
+          "mutable": {
+            "description": "Whether it may be changed at all.\n\nA review result is immutable: it records what someone concluded at a moment, and a record that can be edited afterwards is not evidence.",
+            "type": "boolean"
+          },
+          "relations": {
+            "description": "The relations it may have.",
+            "items": {
+              "$ref": "#/components/schemas/RelationDescriptor"
+            },
+            "type": "array"
+          },
+          "schema": {
+            "description": "Where its JSON Schema can be fetched, when one is published.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "summary": {
+            "description": "A one-line description.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_type",
+          "mutable",
+          "summary"
+        ],
+        "type": "object"
+      },
+      "VersionedEntityRef": {
+        "description": "A reference to one exact revision of an entity, `<id>@<revision>`.",
+        "pattern": "^[A-Za-z0-9_-]{12,128}@[1-9][0-9]*$",
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "AEP Service documentation",
+    "url": "https://beyond10x.github.io/aep-service/docs/intro"
+  },
+  "info": {
+    "description": "Authenticated semantic commands and queries for Agentic Engineering Protocol entities. PostgreSQL and Entity Runtime provider operations are not public APIs.",
+    "title": "AEP Service API",
+    "version": "0.1.4"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/aep/v1/realms/{realm}/workspaces/{workspace}/audit/query": {
+      "post": {
+        "description": "Query accepted and refused activity by entity, correlation, command, authority, kind or time range.",
+        "operationId": "queryAudit",
+        "parameters": [
+          {
+            "description": "The isolated policy, definition and data boundary.",
+            "in": "path",
+            "name": "realm",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The repository or collaboration surface inside the realm.",
+            "in": "path",
+            "name": "workspace",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.aep.service+json;version=1": {
+              "examples": {
+                "request": {
+                  "summary": "Find activity in one correlation",
+                  "value": {
+                    "actor": "human:developer",
+                    "after": null,
+                    "command_id": null,
+                    "correlation_id": "docs-evaluation",
+                    "entity": null,
+                    "kind": null,
+                    "limit": 25,
+                    "rejected_only": false,
+                    "since": null,
+                    "until": null
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/AuditQueryV1"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditQueryResponseV1"
+                }
+              }
+            },
+            "description": "The request was answered."
+          },
+          "400": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Malformed strict request",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "code": "type_mismatch",
+                              "location": "target",
+                              "message": "required member is missing"
+                            }
+                          ]
+                        },
+                        "message": "the request is malformed",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-malformed"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The request document or media negotiation is malformed."
+          },
+          "401": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Credential required",
+                    "value": {
+                      "error": {
+                        "code": "unauthenticated",
+                        "details": {
+                          "reason": "credential missing"
+                        },
+                        "message": "a valid credential is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthenticated"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "No credential was accepted."
+          },
+          "403": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Workspace outside the grant",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "details": {
+                          "capability": null,
+                          "reason": "workspace is not granted"
+                        },
+                        "message": "workspace access is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthorized"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The verified principal is outside the requested realm or workspace."
+          },
+          "404": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Entity not found",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "details": {
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8"
+                        },
+                        "message": "the requested entity does not exist",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The requested entity, locator or type does not exist."
+          },
+          "409": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Semantic or revision conflict",
+                    "value": {
+                      "error": {
+                        "code": "revision_conflict",
+                        "details": {
+                          "actual": 8,
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8",
+                          "expected": 7
+                        },
+                        "message": "the entity changed since the expected revision",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-conflict"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The semantic command, revision guard or idempotency identity conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Invalid semantic input",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "path": "payload.data.title",
+                              "reason": "must not be empty"
+                            }
+                          ]
+                        },
+                        "message": "the semantic request is invalid",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The strict document is structurally valid but semantically invalid."
+          },
+          "503": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Authority temporarily unavailable",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database unavailable"
+                        },
+                        "message": "the service cannot answer now",
+                        "retryable": true
+                      },
+                      "request_id": "server-request-unavailable"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database authority or bounded execution capacity is temporarily unavailable."
+          },
+          "504": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Exchange deadline exceeded",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database exchange exceeded its deadline"
+                        },
+                        "message": "database exchange exceeded its deadline",
+                        "retryable": true
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database-backed exchange exceeded its configured deadline."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Query attributable audit records",
+        "tags": [
+          "Audit"
+        ]
+      }
+    },
+    "/aep/v1/realms/{realm}/workspaces/{workspace}/commands": {
+      "post": {
+        "description": "Submit one versioned AEP intention. The service derives actor, executor, request identity and received time from verified server context, then commits the complete outcome or no mutation.",
+        "operationId": "executeCommand",
+        "parameters": [
+          {
+            "description": "The isolated policy, definition and data boundary.",
+            "in": "path",
+            "name": "realm",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The repository or collaboration surface inside the realm.",
+            "in": "path",
+            "name": "workspace",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.aep.service+json;version=1": {
+              "examples": {
+                "request": {
+                  "summary": "Create a draft story",
+                  "value": {
+                    "causation": null,
+                    "command_id": "docs-create-story",
+                    "command_type": "aep.entity.create/v1",
+                    "correlation_id": "docs-evaluation",
+                    "execution_id": null,
+                    "expected_revision": null,
+                    "idempotency_key": "docs-create-story-v1",
+                    "payload": {
+                      "command": "create-entity",
+                      "data": {
+                        "status": "draft",
+                        "title": "First governed story"
+                      },
+                      "entity_type": "aep.story/v1",
+                      "locator": "ep://demo/plan/story/first-governed-story"
+                    },
+                    "target": null,
+                    "task": null
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/CommandRequestV1"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "answer": {
+                    "summary": "An answered request",
+                    "value": {
+                      "request_id": "server-request-accepted",
+                      "result": {
+                        "affected": [],
+                        "audit": [],
+                        "command_id": "command-1",
+                        "consistency": "seq:1",
+                        "events": [],
+                        "outcome": "accepted"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CommandResponseV1"
+                }
+              }
+            },
+            "description": "The request was answered."
+          },
+          "400": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Malformed strict request",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "code": "type_mismatch",
+                              "location": "target",
+                              "message": "required member is missing"
+                            }
+                          ]
+                        },
+                        "message": "the request is malformed",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-malformed"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The request document or media negotiation is malformed."
+          },
+          "401": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Credential required",
+                    "value": {
+                      "error": {
+                        "code": "unauthenticated",
+                        "details": {
+                          "reason": "credential missing"
+                        },
+                        "message": "a valid credential is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthenticated"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "No credential was accepted."
+          },
+          "403": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Workspace outside the grant",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "details": {
+                          "capability": null,
+                          "reason": "workspace is not granted"
+                        },
+                        "message": "workspace access is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthorized"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The verified principal is outside the requested realm or workspace."
+          },
+          "404": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Entity not found",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "details": {
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8"
+                        },
+                        "message": "the requested entity does not exist",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The requested entity, locator or type does not exist."
+          },
+          "409": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Semantic or revision conflict",
+                    "value": {
+                      "error": {
+                        "code": "revision_conflict",
+                        "details": {
+                          "actual": 8,
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8",
+                          "expected": 7
+                        },
+                        "message": "the entity changed since the expected revision",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-conflict"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The semantic command, revision guard or idempotency identity conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Invalid semantic input",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "path": "payload.data.title",
+                              "reason": "must not be empty"
+                            }
+                          ]
+                        },
+                        "message": "the semantic request is invalid",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The strict document is structurally valid but semantically invalid."
+          },
+          "503": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Authority temporarily unavailable",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database unavailable"
+                        },
+                        "message": "the service cannot answer now",
+                        "retryable": true
+                      },
+                      "request_id": "server-request-unavailable"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database authority or bounded execution capacity is temporarily unavailable."
+          },
+          "504": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Exchange deadline exceeded",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database exchange exceeded its deadline"
+                        },
+                        "message": "database exchange exceeded its deadline",
+                        "retryable": true
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database-backed exchange exceeded its configured deadline."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Execute one semantic command",
+        "tags": [
+          "Commands"
+        ]
+      }
+    },
+    "/aep/v1/realms/{realm}/workspaces/{workspace}/entities/query": {
+      "post": {
+        "description": "Query current entities with exact typed filters, bounded pagination and an explicit consistency demand.",
+        "operationId": "queryEntities",
+        "parameters": [
+          {
+            "description": "The isolated policy, definition and data boundary.",
+            "in": "path",
+            "name": "realm",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The repository or collaboration surface inside the realm.",
+            "in": "path",
+            "name": "workspace",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.aep.service+json;version=1": {
+              "examples": {
+                "request": {
+                  "summary": "Find draft stories",
+                  "value": {
+                    "after": null,
+                    "consistency": {
+                      "consistency": "current"
+                    },
+                    "entity_type": "aep.story/v1",
+                    "limit": 25,
+                    "matching": {
+                      "status": "draft"
+                    },
+                    "organisation": "demo",
+                    "related_to": null,
+                    "relation": null,
+                    "space": "plan"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/EntityQueryV1"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "answer": {
+                    "summary": "An answered request",
+                    "value": {
+                      "request_id": "server-request-query",
+                      "result": {
+                        "items": [],
+                        "next": null
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/EntityQueryResponseV1"
+                }
+              }
+            },
+            "description": "The request was answered."
+          },
+          "400": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Malformed strict request",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "code": "type_mismatch",
+                              "location": "target",
+                              "message": "required member is missing"
+                            }
+                          ]
+                        },
+                        "message": "the request is malformed",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-malformed"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The request document or media negotiation is malformed."
+          },
+          "401": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Credential required",
+                    "value": {
+                      "error": {
+                        "code": "unauthenticated",
+                        "details": {
+                          "reason": "credential missing"
+                        },
+                        "message": "a valid credential is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthenticated"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "No credential was accepted."
+          },
+          "403": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Workspace outside the grant",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "details": {
+                          "capability": null,
+                          "reason": "workspace is not granted"
+                        },
+                        "message": "workspace access is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthorized"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The verified principal is outside the requested realm or workspace."
+          },
+          "404": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Entity not found",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "details": {
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8"
+                        },
+                        "message": "the requested entity does not exist",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The requested entity, locator or type does not exist."
+          },
+          "409": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Semantic or revision conflict",
+                    "value": {
+                      "error": {
+                        "code": "revision_conflict",
+                        "details": {
+                          "actual": 8,
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8",
+                          "expected": 7
+                        },
+                        "message": "the entity changed since the expected revision",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-conflict"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The semantic command, revision guard or idempotency identity conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Invalid semantic input",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "path": "payload.data.title",
+                              "reason": "must not be empty"
+                            }
+                          ]
+                        },
+                        "message": "the semantic request is invalid",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The strict document is structurally valid but semantically invalid."
+          },
+          "503": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Authority temporarily unavailable",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database unavailable"
+                        },
+                        "message": "the service cannot answer now",
+                        "retryable": true
+                      },
+                      "request_id": "server-request-unavailable"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database authority or bounded execution capacity is temporarily unavailable."
+          },
+          "504": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Exchange deadline exceeded",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database exchange exceeded its deadline"
+                        },
+                        "message": "database exchange exceeded its deadline",
+                        "retryable": true
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database-backed exchange exceeded its configured deadline."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Query entities",
+        "tags": [
+          "Entities"
+        ]
+      }
+    },
+    "/aep/v1/realms/{realm}/workspaces/{workspace}/entities/resolve": {
+      "post": {
+        "description": "Resolve a stable `ep://` locator to its current immutable entity identity and revision.",
+        "operationId": "resolveEntity",
+        "parameters": [
+          {
+            "description": "The isolated policy, definition and data boundary.",
+            "in": "path",
+            "name": "realm",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The repository or collaboration surface inside the realm.",
+            "in": "path",
+            "name": "workspace",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.aep.service+json;version=1": {
+              "examples": {
+                "request": {
+                  "summary": "Resolve a story locator",
+                  "value": {
+                    "locator": "ep://demo/plan/story/first-governed-story"
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/ResolveRequestV1"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveResponseV1"
+                }
+              }
+            },
+            "description": "The request was answered."
+          },
+          "400": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Malformed strict request",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "code": "type_mismatch",
+                              "location": "target",
+                              "message": "required member is missing"
+                            }
+                          ]
+                        },
+                        "message": "the request is malformed",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-malformed"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The request document or media negotiation is malformed."
+          },
+          "401": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Credential required",
+                    "value": {
+                      "error": {
+                        "code": "unauthenticated",
+                        "details": {
+                          "reason": "credential missing"
+                        },
+                        "message": "a valid credential is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthenticated"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "No credential was accepted."
+          },
+          "403": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Workspace outside the grant",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "details": {
+                          "capability": null,
+                          "reason": "workspace is not granted"
+                        },
+                        "message": "workspace access is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthorized"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The verified principal is outside the requested realm or workspace."
+          },
+          "404": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Entity not found",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "details": {
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8"
+                        },
+                        "message": "the requested entity does not exist",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The requested entity, locator or type does not exist."
+          },
+          "409": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Semantic or revision conflict",
+                    "value": {
+                      "error": {
+                        "code": "revision_conflict",
+                        "details": {
+                          "actual": 8,
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8",
+                          "expected": 7
+                        },
+                        "message": "the entity changed since the expected revision",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-conflict"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The semantic command, revision guard or idempotency identity conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Invalid semantic input",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "path": "payload.data.title",
+                              "reason": "must not be empty"
+                            }
+                          ]
+                        },
+                        "message": "the semantic request is invalid",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The strict document is structurally valid but semantically invalid."
+          },
+          "503": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Authority temporarily unavailable",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database unavailable"
+                        },
+                        "message": "the service cannot answer now",
+                        "retryable": true
+                      },
+                      "request_id": "server-request-unavailable"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database authority or bounded execution capacity is temporarily unavailable."
+          },
+          "504": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Exchange deadline exceeded",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database exchange exceeded its deadline"
+                        },
+                        "message": "database exchange exceeded its deadline",
+                        "retryable": true
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database-backed exchange exceeded its configured deadline."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Resolve a logical entity address",
+        "tags": [
+          "Entities"
+        ]
+      }
+    },
+    "/aep/v1/realms/{realm}/workspaces/{workspace}/entities/{entity}": {
+      "get": {
+        "description": "Read current entity state by immutable entity identity inside the authorized realm and workspace.",
+        "operationId": "getEntity",
+        "parameters": [
+          {
+            "description": "The isolated policy, definition and data boundary.",
+            "in": "path",
+            "name": "realm",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The repository or collaboration surface inside the realm.",
+            "in": "path",
+            "name": "workspace",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The immutable entity identity.",
+            "in": "path",
+            "name": "entity",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityResponseV1"
+                }
+              }
+            },
+            "description": "The request was answered."
+          },
+          "400": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Malformed strict request",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "code": "type_mismatch",
+                              "location": "target",
+                              "message": "required member is missing"
+                            }
+                          ]
+                        },
+                        "message": "the request is malformed",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-malformed"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The request document or media negotiation is malformed."
+          },
+          "401": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Credential required",
+                    "value": {
+                      "error": {
+                        "code": "unauthenticated",
+                        "details": {
+                          "reason": "credential missing"
+                        },
+                        "message": "a valid credential is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthenticated"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "No credential was accepted."
+          },
+          "403": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Workspace outside the grant",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "details": {
+                          "capability": null,
+                          "reason": "workspace is not granted"
+                        },
+                        "message": "workspace access is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthorized"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The verified principal is outside the requested realm or workspace."
+          },
+          "404": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Entity not found",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "details": {
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8"
+                        },
+                        "message": "the requested entity does not exist",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The requested entity, locator or type does not exist."
+          },
+          "409": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Semantic or revision conflict",
+                    "value": {
+                      "error": {
+                        "code": "revision_conflict",
+                        "details": {
+                          "actual": 8,
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8",
+                          "expected": 7
+                        },
+                        "message": "the entity changed since the expected revision",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-conflict"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The semantic command, revision guard or idempotency identity conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Invalid semantic input",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "path": "payload.data.title",
+                              "reason": "must not be empty"
+                            }
+                          ]
+                        },
+                        "message": "the semantic request is invalid",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The strict document is structurally valid but semantically invalid."
+          },
+          "503": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Authority temporarily unavailable",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database unavailable"
+                        },
+                        "message": "the service cannot answer now",
+                        "retryable": true
+                      },
+                      "request_id": "server-request-unavailable"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database authority or bounded execution capacity is temporarily unavailable."
+          },
+          "504": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Exchange deadline exceeded",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database exchange exceeded its deadline"
+                        },
+                        "message": "database exchange exceeded its deadline",
+                        "retryable": true
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database-backed exchange exceeded its configured deadline."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Read one entity",
+        "tags": [
+          "Entities"
+        ]
+      }
+    },
+    "/aep/v1/realms/{realm}/workspaces/{workspace}/entities/{entity}/history": {
+      "get": {
+        "description": "Read the immutable revision sequence for one authorized entity.",
+        "operationId": "getEntityHistory",
+        "parameters": [
+          {
+            "description": "The isolated policy, definition and data boundary.",
+            "in": "path",
+            "name": "realm",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The repository or collaboration surface inside the realm.",
+            "in": "path",
+            "name": "workspace",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The immutable entity identity.",
+            "in": "path",
+            "name": "entity",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryResponseV1"
+                }
+              }
+            },
+            "description": "The request was answered."
+          },
+          "400": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Malformed strict request",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "code": "type_mismatch",
+                              "location": "target",
+                              "message": "required member is missing"
+                            }
+                          ]
+                        },
+                        "message": "the request is malformed",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-malformed"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The request document or media negotiation is malformed."
+          },
+          "401": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Credential required",
+                    "value": {
+                      "error": {
+                        "code": "unauthenticated",
+                        "details": {
+                          "reason": "credential missing"
+                        },
+                        "message": "a valid credential is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthenticated"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "No credential was accepted."
+          },
+          "403": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Workspace outside the grant",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "details": {
+                          "capability": null,
+                          "reason": "workspace is not granted"
+                        },
+                        "message": "workspace access is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthorized"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The verified principal is outside the requested realm or workspace."
+          },
+          "404": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Entity not found",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "details": {
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8"
+                        },
+                        "message": "the requested entity does not exist",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The requested entity, locator or type does not exist."
+          },
+          "409": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Semantic or revision conflict",
+                    "value": {
+                      "error": {
+                        "code": "revision_conflict",
+                        "details": {
+                          "actual": 8,
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8",
+                          "expected": 7
+                        },
+                        "message": "the entity changed since the expected revision",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-conflict"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The semantic command, revision guard or idempotency identity conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Invalid semantic input",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "path": "payload.data.title",
+                              "reason": "must not be empty"
+                            }
+                          ]
+                        },
+                        "message": "the semantic request is invalid",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The strict document is structurally valid but semantically invalid."
+          },
+          "503": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Authority temporarily unavailable",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database unavailable"
+                        },
+                        "message": "the service cannot answer now",
+                        "retryable": true
+                      },
+                      "request_id": "server-request-unavailable"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database authority or bounded execution capacity is temporarily unavailable."
+          },
+          "504": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Exchange deadline exceeded",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database exchange exceeded its deadline"
+                        },
+                        "message": "database exchange exceeded its deadline",
+                        "retryable": true
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database-backed exchange exceeded its configured deadline."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Read complete entity history",
+        "tags": [
+          "History"
+        ]
+      }
+    },
+    "/aep/v1/realms/{realm}/workspaces/{workspace}/history/query": {
+      "post": {
+        "description": "Page through immutable revisions with an opaque continuation cursor and consistency demand.",
+        "operationId": "queryEntityHistory",
+        "parameters": [
+          {
+            "description": "The isolated policy, definition and data boundary.",
+            "in": "path",
+            "name": "realm",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The repository or collaboration surface inside the realm.",
+            "in": "path",
+            "name": "workspace",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.aep.service+json;version=2": {
+              "examples": {
+                "request": {
+                  "summary": "Read the first page of revisions",
+                  "value": {
+                    "after": null,
+                    "consistency": {
+                      "consistency": "current"
+                    },
+                    "entity": "01K2R8JD3ZJME72AJGQY67E5F8",
+                    "limit": 25
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/HistoryQueryV2"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.aep.service+json;version=2": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryQueryResponseV2"
+                }
+              }
+            },
+            "description": "The request was answered."
+          },
+          "400": {
+            "content": {
+              "application/vnd.aep.service+json;version=2": {
+                "examples": {
+                  "problem": {
+                    "summary": "Malformed strict request",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "code": "type_mismatch",
+                              "location": "target",
+                              "message": "required member is missing"
+                            }
+                          ]
+                        },
+                        "message": "the request is malformed",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-malformed"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The request document or media negotiation is malformed."
+          },
+          "401": {
+            "content": {
+              "application/vnd.aep.service+json;version=2": {
+                "examples": {
+                  "problem": {
+                    "summary": "Credential required",
+                    "value": {
+                      "error": {
+                        "code": "unauthenticated",
+                        "details": {
+                          "reason": "credential missing"
+                        },
+                        "message": "a valid credential is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthenticated"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "No credential was accepted."
+          },
+          "403": {
+            "content": {
+              "application/vnd.aep.service+json;version=2": {
+                "examples": {
+                  "problem": {
+                    "summary": "Workspace outside the grant",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "details": {
+                          "capability": null,
+                          "reason": "workspace is not granted"
+                        },
+                        "message": "workspace access is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthorized"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The verified principal is outside the requested realm or workspace."
+          },
+          "404": {
+            "content": {
+              "application/vnd.aep.service+json;version=2": {
+                "examples": {
+                  "problem": {
+                    "summary": "Entity not found",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "details": {
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8"
+                        },
+                        "message": "the requested entity does not exist",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The requested entity, locator or type does not exist."
+          },
+          "409": {
+            "content": {
+              "application/vnd.aep.service+json;version=2": {
+                "examples": {
+                  "problem": {
+                    "summary": "Semantic or revision conflict",
+                    "value": {
+                      "error": {
+                        "code": "revision_conflict",
+                        "details": {
+                          "actual": 8,
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8",
+                          "expected": 7
+                        },
+                        "message": "the entity changed since the expected revision",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-conflict"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The semantic command, revision guard or idempotency identity conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/vnd.aep.service+json;version=2": {
+                "examples": {
+                  "problem": {
+                    "summary": "Invalid semantic input",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "path": "payload.data.title",
+                              "reason": "must not be empty"
+                            }
+                          ]
+                        },
+                        "message": "the semantic request is invalid",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The strict document is structurally valid but semantically invalid."
+          },
+          "503": {
+            "content": {
+              "application/vnd.aep.service+json;version=2": {
+                "examples": {
+                  "problem": {
+                    "summary": "Authority temporarily unavailable",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database unavailable"
+                        },
+                        "message": "the service cannot answer now",
+                        "retryable": true
+                      },
+                      "request_id": "server-request-unavailable"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database authority or bounded execution capacity is temporarily unavailable."
+          },
+          "504": {
+            "content": {
+              "application/vnd.aep.service+json;version=2": {
+                "examples": {
+                  "problem": {
+                    "summary": "Exchange deadline exceeded",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database exchange exceeded its deadline"
+                        },
+                        "message": "database exchange exceeded its deadline",
+                        "retryable": true
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database-backed exchange exceeded its configured deadline."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Query bounded entity history",
+        "tags": [
+          "History"
+        ]
+      }
+    },
+    "/aep/v1/realms/{realm}/workspaces/{workspace}/relations/query": {
+      "post": {
+        "description": "Query typed incoming or outgoing entity edges without exposing the underlying provider representation.",
+        "operationId": "queryRelations",
+        "parameters": [
+          {
+            "description": "The isolated policy, definition and data boundary.",
+            "in": "path",
+            "name": "realm",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The repository or collaboration surface inside the realm.",
+            "in": "path",
+            "name": "workspace",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/vnd.aep.service+json;version=1": {
+              "examples": {
+                "request": {
+                  "summary": "Find outgoing decomposition relations",
+                  "value": {
+                    "after": null,
+                    "consistency": {
+                      "consistency": "current"
+                    },
+                    "kind": "decomposes",
+                    "limit": 25,
+                    "source": "01K2R8JD3ZJME72AJGQY67E5F8",
+                    "target": null
+                  }
+                }
+              },
+              "schema": {
+                "$ref": "#/components/schemas/RelationQueryV1"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationQueryResponseV1"
+                }
+              }
+            },
+            "description": "The request was answered."
+          },
+          "400": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Malformed strict request",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "code": "type_mismatch",
+                              "location": "target",
+                              "message": "required member is missing"
+                            }
+                          ]
+                        },
+                        "message": "the request is malformed",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-malformed"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The request document or media negotiation is malformed."
+          },
+          "401": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Credential required",
+                    "value": {
+                      "error": {
+                        "code": "unauthenticated",
+                        "details": {
+                          "reason": "credential missing"
+                        },
+                        "message": "a valid credential is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthenticated"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "No credential was accepted."
+          },
+          "403": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Workspace outside the grant",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "details": {
+                          "capability": null,
+                          "reason": "workspace is not granted"
+                        },
+                        "message": "workspace access is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthorized"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The verified principal is outside the requested realm or workspace."
+          },
+          "404": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Entity not found",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "details": {
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8"
+                        },
+                        "message": "the requested entity does not exist",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The requested entity, locator or type does not exist."
+          },
+          "409": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Semantic or revision conflict",
+                    "value": {
+                      "error": {
+                        "code": "revision_conflict",
+                        "details": {
+                          "actual": 8,
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8",
+                          "expected": 7
+                        },
+                        "message": "the entity changed since the expected revision",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-conflict"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The semantic command, revision guard or idempotency identity conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Invalid semantic input",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "path": "payload.data.title",
+                              "reason": "must not be empty"
+                            }
+                          ]
+                        },
+                        "message": "the semantic request is invalid",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The strict document is structurally valid but semantically invalid."
+          },
+          "503": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Authority temporarily unavailable",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database unavailable"
+                        },
+                        "message": "the service cannot answer now",
+                        "retryable": true
+                      },
+                      "request_id": "server-request-unavailable"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database authority or bounded execution capacity is temporarily unavailable."
+          },
+          "504": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Exchange deadline exceeded",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database exchange exceeded its deadline"
+                        },
+                        "message": "database exchange exceeded its deadline",
+                        "retryable": true
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database-backed exchange exceeded its configured deadline."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Query relations",
+        "tags": [
+          "Relations"
+        ]
+      }
+    },
+    "/aep/v1/realms/{realm}/workspaces/{workspace}/types/{entity_type}": {
+      "get": {
+        "description": "Inspect the commands, lifecycle and relations exposed by the active immutable definition bundle.",
+        "operationId": "describeEntityType",
+        "parameters": [
+          {
+            "description": "The isolated policy, definition and data boundary.",
+            "in": "path",
+            "name": "realm",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The repository or collaboration surface inside the realm.",
+            "in": "path",
+            "name": "workspace",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The versioned entity type, URL-encoded where necessary.",
+            "in": "path",
+            "name": "entity_type",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypeDescriptionResponseV1"
+                }
+              }
+            },
+            "description": "The request was answered."
+          },
+          "400": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Malformed strict request",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "code": "type_mismatch",
+                              "location": "target",
+                              "message": "required member is missing"
+                            }
+                          ]
+                        },
+                        "message": "the request is malformed",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-malformed"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The request document or media negotiation is malformed."
+          },
+          "401": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Credential required",
+                    "value": {
+                      "error": {
+                        "code": "unauthenticated",
+                        "details": {
+                          "reason": "credential missing"
+                        },
+                        "message": "a valid credential is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthenticated"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "No credential was accepted."
+          },
+          "403": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Workspace outside the grant",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "details": {
+                          "capability": null,
+                          "reason": "workspace is not granted"
+                        },
+                        "message": "workspace access is required",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-unauthorized"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The verified principal is outside the requested realm or workspace."
+          },
+          "404": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Entity not found",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "details": {
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8"
+                        },
+                        "message": "the requested entity does not exist",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The requested entity, locator or type does not exist."
+          },
+          "409": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Semantic or revision conflict",
+                    "value": {
+                      "error": {
+                        "code": "revision_conflict",
+                        "details": {
+                          "actual": 8,
+                          "entity": "01K2R8JD3ZJME72AJGQY67E5F8",
+                          "expected": 7
+                        },
+                        "message": "the entity changed since the expected revision",
+                        "retryable": false
+                      },
+                      "request_id": "server-request-conflict"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The semantic command, revision guard or idempotency identity conflicts with current state."
+          },
+          "422": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Invalid semantic input",
+                    "value": {
+                      "error": {
+                        "code": "invalid",
+                        "details": {
+                          "errors": [
+                            {
+                              "path": "payload.data.title",
+                              "reason": "must not be empty"
+                            }
+                          ]
+                        },
+                        "message": "the semantic request is invalid",
+                        "retryable": false
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The strict document is structurally valid but semantically invalid."
+          },
+          "503": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Authority temporarily unavailable",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database unavailable"
+                        },
+                        "message": "the service cannot answer now",
+                        "retryable": true
+                      },
+                      "request_id": "server-request-unavailable"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database authority or bounded execution capacity is temporarily unavailable."
+          },
+          "504": {
+            "content": {
+              "application/vnd.aep.service+json;version=1": {
+                "examples": {
+                  "problem": {
+                    "summary": "Exchange deadline exceeded",
+                    "value": {
+                      "error": {
+                        "code": "unavailable",
+                        "details": {
+                          "reason": "database exchange exceeded its deadline"
+                        },
+                        "message": "database exchange exceeded its deadline",
+                        "retryable": true
+                      },
+                      "request_id": "0198f03a-7b62-7000-8000-000000000001"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDocumentV1"
+                }
+              }
+            },
+            "description": "The database-backed exchange exceeded its configured deadline."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Describe one registered entity type",
+        "tags": [
+          "Types"
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "tags": [
+    {
+      "description": "Submit one attributable semantic state change.",
+      "name": "Commands"
+    },
+    {
+      "description": "Resolve, read and query current entity state.",
+      "name": "Entities"
+    },
+    {
+      "description": "Query typed edges between entities.",
+      "name": "Relations"
+    },
+    {
+      "description": "Read immutable entity revisions.",
+      "name": "History"
+    },
+    {
+      "description": "Query attributable accepted and refused activity.",
+      "name": "Audit"
+    },
+    {
+      "description": "Inspect registered entity capabilities and lifecycles.",
+      "name": "Types"
+    }
+  ]
+}

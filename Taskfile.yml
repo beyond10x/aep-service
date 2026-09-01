@@ -15,6 +15,7 @@ tasks:
       - cargo test --workspace --locked
       - RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --locked
       - cargo +1.85 build --workspace --locked
+      - task: openapi-check
       - aep artifact validate
       - |
         if [ -n "${ENTITY_POSTGRES_URL:-}" ]; then
@@ -27,6 +28,15 @@ tasks:
     desc: Generate the public OpenAPI asset from AEP-owned routes and DTO schemas.
     cmds:
       - cargo run --quiet --locked -p aep-service -- openapi > website/static/openapi.json
+
+  openapi-check:
+    desc: Refuse drift between the committed public OpenAPI asset and the service contract.
+    cmds:
+      - |
+        candidate="$(mktemp "${TMPDIR:-/tmp}/aep-service-openapi.XXXXXX")"
+        trap 'rm -f "$candidate"' EXIT
+        cargo run --quiet --locked -p aep-service -- openapi > "$candidate"
+        cmp "$candidate" website/static/openapi.json
 
   site-build:
     desc: Install website dependencies, generate OpenAPI, type-check and build the public site.

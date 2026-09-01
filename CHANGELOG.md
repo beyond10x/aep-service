@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Committed the deterministic OpenAPI 3.1 projection as a passive public documentation source and
+  added a gate check that refuses drift from the service-owned route and schema definitions.
 - Reduced tagged delivery to the supported Linux diagnostic archive and multiarch OCI image, and
   moved release and manifest finalization into their producing jobs so account limits cannot strand
   already-built artifacts in new post-build runners.
