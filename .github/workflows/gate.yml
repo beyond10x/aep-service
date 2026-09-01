@@ -35,15 +35,28 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
       - uses: arduino/setup-task@b91d5d2c96a56797b48ac1e0e89220bf64044611 # v2
+      - name: Restore pinned gate tools
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.cargo/bin/aep
+            ~/.cargo/bin/protocol
+            ~/.cargo/bin/cargo-deny
+          key: ${{ runner.os }}-${{ runner.arch }}-gate-tools-aep-0.40.3-cargo-deny-0.20.2-v1
       - name: Install protocol
         run: |
-          cargo install --git https://github.com/beyond10x/aep --tag 0.40.3 --locked protocol-cli
+          if [ "$(aep --version 2>/dev/null || true)" != "protocol 0.40.3" ] || \
+             [ "$(protocol --version 2>/dev/null || true)" != "protocol 0.40.3" ]; then
+            cargo install --force --git https://github.com/beyond10x/aep --tag 0.40.3 --locked protocol-cli
+          fi
       - name: Install cargo-deny with its own pinned toolchain
         run: |
           # Audit tooling may move faster than the service MSRV. Keep the service gate on 1.85
           # while compiling the pinned auditor with the minimum toolchain it requires.
-          rustup toolchain install 1.88.0 --profile minimal
-          cargo +1.88.0 install cargo-deny --version 0.20.2 --locked
+          if [ "$(cargo deny --version 2>/dev/null || true)" != "cargo-deny 0.20.2" ]; then
+            rustup toolchain install 1.88.0 --profile minimal
+            cargo +1.88.0 install cargo-deny --version 0.20.2 --locked
+          fi
       - run: task check
 
   site:

@@ -30,10 +30,6 @@ jobs:
             target: aarch64-apple-darwin
             executable: aep-service
             extension: tar.gz
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            executable: aep-service.exe
-            extension: zip
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -41,23 +37,17 @@ jobs:
         with:
           toolchain: 1.85.0
           targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          shared-key: release-${{ matrix.target }}
       - run: cargo build --release --locked -p aep-service --target ${{ matrix.target }}
-      - name: Package Unix archive
-        if: matrix.extension == 'tar.gz'
+      - name: Package archive
         shell: bash
         run: |
           bundle="aep-service-${{ github.ref_name }}-${{ matrix.target }}"
           mkdir "$bundle"
           cp "target/${{ matrix.target }}/release/${{ matrix.executable }}" LICENSE README.md "$bundle/"
           tar -czf "$bundle.tar.gz" "$bundle"
-      - name: Package Windows archive
-        if: matrix.extension == 'zip'
-        shell: pwsh
-        run: |
-          $bundle = "aep-service-${{ github.ref_name }}-${{ matrix.target }}"
-          New-Item -ItemType Directory -Path $bundle
-          Copy-Item "target/${{ matrix.target }}/release/${{ matrix.executable }}", LICENSE, README.md -Destination $bundle
-          Compress-Archive -Path $bundle -DestinationPath "$bundle.zip"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: aep-service-${{ matrix.target }}
@@ -81,23 +71,79 @@ jobs:
 
   image:
     needs: gate
-    runs-on: ubuntu-latest
+    # Compile on the target architecture: QEMU made the ARM release image take about an hour.
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            platform: linux/amd64
+            os: ubuntu-latest
+          - arch: arm64
+            platform: linux/arm64
+            os: ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
       - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
       - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+      - name: Build and push platform image by digest
+        id: build
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
+          platforms: ${{ matrix.platform }}
+          outputs: type=image,name=ghcr.io/beyond10x/aep-service,push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=aep-service-image-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=aep-service-image-${{ matrix.arch }},ignore-error=true
           provenance: mode=max
           sbom: true
-          tags: |
-            ghcr.io/beyond10x/aep-service:${{ github.ref_name }}
-            ghcr.io/beyond10x/aep-service:preview
+      - name: Export image digest
+        shell: bash
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: image-digest-${{ matrix.arch }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  image-manifest:
+    needs: image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: image-digest-*
+          path: /tmp/digests
+          merge-multiple: true
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish multiarch manifest
+        working-directory: /tmp/digests
+        shell: bash
+        run: |
+          mapfile -t digests < <(find . -maxdepth 1 -type f -printf '%f\n' | sort)
+          if [ "${#digests[@]}" -ne 2 ]; then
+            echo "expected two platform digests, found ${#digests[@]}" >&2
+            exit 1
+          fi
+          image="ghcr.io/beyond10x/aep-service"
+          references=()
+          for digest in "${digests[@]}"; do
+            references+=("${image}@sha256:${digest}")
+          done
+          docker buildx imagetools create \
+            --tag "${image}:${GITHUB_REF_NAME}" \
+            --tag "${image}:preview" \
+            "${references[@]}"

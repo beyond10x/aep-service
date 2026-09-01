@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.4] — 2026-09-01
+
+- Accelerated tagged delivery with cached gate tools and native release builds, replaced emulated
+  multiarch image compilation with parallel native architecture builds, and retired the unsupported
+  Windows archive while retaining Linux, macOS and multiarch OCI artifacts.
+
 ## [0.1.3] — 2026-09-01
 
 - Repin the service to AEP 0.40.3 and Entity Runtime 0.17.5, and use the canonical `aep` command
