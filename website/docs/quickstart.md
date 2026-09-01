@@ -20,7 +20,7 @@ Create a clean directory and clone the exact source generations used by this gui
 ```console
 mkdir aep-evaluation && cd aep-evaluation
 git clone --branch 0.1.1 --depth 1 https://github.com/beyond10x/aep-service.git
-git clone --branch 0.38.1 --depth 1 https://github.com/beyond10x/engineering-protocols.git
+git clone --branch 0.38.1 --depth 1 https://github.com/beyond10x/aep.git
 cd aep-service
 ```
 
@@ -28,7 +28,7 @@ Choose a local token and ask the released image to validate and digest the defin
 
 ```console
 export AEP_DEV_BEARER_TOKEN='local-preview-change-me'
-export AEP_DEFINITIONS_PATH='../engineering-protocols'
+export AEP_DEFINITIONS_PATH='../aep'
 export AEP_DEFINITION_DIGEST="$(docker run --rm \
   --volume "$(realpath "$AEP_DEFINITIONS_PATH"):/definitions:ro" \
   ghcr.io/beyond10x/aep-service:0.1.1 \

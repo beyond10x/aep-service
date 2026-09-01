@@ -39,7 +39,7 @@ AEP Service owns the deployable boundary:
 - immutable definition-bundle verification at startup; and
 - public deployment artifacts, OpenAPI and operational documentation.
 
-[Engineering Protocols](https://github.com/beyond10x/engineering-protocols) owns the semantic
+[AEP](https://github.com/beyond10x/aep) owns the semantic
 entity vocabulary, commands, queries, strict wire documents and official client.
 [Entity Runtime](https://github.com/beyond10x/entity-runtime) owns deterministic entity execution
 and generic storage/query providers. The service composes their released contracts; it does not

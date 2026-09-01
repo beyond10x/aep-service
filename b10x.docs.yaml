@@ -21,7 +21,7 @@ surfaces:
       - {label: OpenAPI, url: https://beyond10x.github.io/aep-service/openapi.json, kind: api}
       - {label: Source, url: https://github.com/beyond10x/aep-service, kind: source}
     relationships:
-      - {target: engineering-protocols/docs, kind: implements}
+      - {target: aep/docs, kind: implements}
       - {target: entity-runtime/docs, kind: uses}
     accent: "#b99cff"
     mark: website/static/img/mark.svg

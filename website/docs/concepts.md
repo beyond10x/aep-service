@@ -35,7 +35,7 @@ narrow current grants. Request JSON cannot assert either trusted identity.
 
 ## Definitions and bundles
 
-Engineering Protocols declares entity types, fields, lifecycles, commands, relations and rules as
+AEP declares entity types, fields, lifecycles, commands, relations and rules as
 data. One validated definition tree becomes an immutable **bundle** identified by a digest. The
 service pins the expected digest at startup so a deployment never silently changes meaning because
 a mounted directory changed.

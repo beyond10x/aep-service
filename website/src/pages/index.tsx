@@ -148,7 +148,7 @@ export default function Home(): ReactNode {
                 <p className={styles.sectionLabel}>FROM INTENT TO EVIDENCE</p>
                 <Heading as="h2" id="flow-title">One door for every meaningful change.</Heading>
               </div>
-              <p>The service composes released Engineering Protocols semantics with Entity Runtime storage. Neither dependency leaks through the public boundary.</p>
+              <p>The service composes released AEP semantics with Entity Runtime storage. Neither dependency leaks through the public boundary.</p>
             </div>
             <ol className={styles.flowGrid}>
               {authorityFlow.map((step, index) => (

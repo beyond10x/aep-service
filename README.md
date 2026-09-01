@@ -11,9 +11,9 @@ one exact bearer token and is loopback-only unless an operator opts into an inse
 
 ## Where it fits
 
-- [Engineering Protocols](https://github.com/beyond10x/engineering-protocols) owns AEP entity
+- [AEP](https://github.com/beyond10x/aep) owns the entity
   vocabulary, semantic command/query traits, strict wire documents, the official client, and the
-  `protocol` CLI.
+  canonical `aep` CLI (`protocol` remains an exact compatibility alias).
 - [Entity Runtime](https://github.com/beyond10x/entity-runtime) owns deterministic entity execution
   and generic persistence/query providers.
 - This repository owns the deployable application: trust-boundary orchestration, the HTTP adapter,
@@ -34,11 +34,11 @@ For source development, generate the same OpenAPI document served at `/openapi.j
 cargo run --locked -p aep-service -- openapi > openapi.json
 ```
 
-Validate the immutable EP definitions and capture the digest the service will pin:
+Validate the immutable AEP definitions and capture the digest the service will pin:
 
 ```console
 export AEP_DEFINITION_DIGEST="$(cargo run --quiet --locked -p aep-service -- \
-  definitions digest --path ../engineering-protocols)"
+  definitions digest --path ../aep)"
 ```
 
 Then provide PostgreSQL and start the authority:
@@ -51,7 +51,7 @@ cargo run --locked -p aep-service -- serve \
   --realm company-planning \
   --workspace example-repository \
   --schema company_planning \
-  --definitions ../engineering-protocols \
+  --definitions ../aep \
   --definition-digest "$AEP_DEFINITION_DIGEST"
 ```
 

@@ -53,7 +53,7 @@ const config: Config = {
       links: [
         {title: 'Evaluate', items: [{label: 'Run the preview', to: '/docs/quickstart'}, {label: 'Architecture', to: '/docs/architecture'}, {label: 'API reference', to: '/api'}]},
         {title: 'Operate', items: [{label: 'Configuration', to: '/docs/configuration'}, {label: 'Reliability', to: '/docs/reliability'}, {label: 'Security', to: '/docs/security'}]},
-        {title: 'Ecosystem', items: [{label: 'Engineering Protocols', href: 'https://github.com/beyond10x/engineering-protocols'}, {label: 'Entity Runtime', href: 'https://github.com/beyond10x/entity-runtime'}, {label: 'Source on GitHub', href: 'https://github.com/beyond10x/aep-service'}]},
+        {title: 'Ecosystem', items: [{label: 'AEP', href: 'https://beyond10x.github.io/aep/'}, {label: 'ESS', href: 'https://beyond10x.github.io/ess/'}, {label: 'Entity Runtime', href: 'https://github.com/beyond10x/entity-runtime'}, {label: 'Source on GitHub', href: 'https://github.com/beyond10x/aep-service'}]},
       ],
       copyright: `Copyright © ${new Date().getFullYear()} beyond10x. Apache-2.0.`,
     },

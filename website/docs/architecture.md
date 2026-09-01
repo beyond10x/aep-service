@@ -1,6 +1,6 @@
 ---
 title: Architecture and boundaries
-description: How AEP Service composes Engineering Protocols, Entity Runtime and PostgreSQL without leaking their internal interfaces.
+description: How AEP Service composes AEP, Entity Runtime and PostgreSQL without leaking their internal interfaces.
 ---
 
 # One semantic boundary over one transactional authority
@@ -32,11 +32,11 @@ trust and transaction boundaries reviewable while producing one deployable proce
 
 | Boundary | Owner | What AEP Service consumes |
 |---|---|---|
-| Semantic vocabulary | Engineering Protocols | Entity types, commands, queries, strict DTOs and route catalog |
+| Semantic vocabulary | AEP | Entity types, commands, queries, strict DTOs and route catalog |
 | Deterministic entity mechanism | Entity Runtime | Kernel and generic store/query/PostgreSQL provider interfaces |
 | Deployable authority | AEP Service | HTTP, trusted context, authorization, transactions, limits and deployment |
 
-Changing route or DTO bytes starts in Engineering Protocols and arrives here through a released
+Changing route or DTO bytes starts in AEP and arrives here through a released
 pin. Changing provider contracts starts in Entity Runtime. The service may enrich OpenAPI
 presentation metadata, but it does not restate a path or payload schema.
 
@@ -62,7 +62,7 @@ Opaque cursors bound pagination without exposing database offsets as a public st
 
 ## Definition boundary
 
-At startup the service loads the configured Engineering Protocols definition tree, validates it and
+At startup the service loads the configured AEP definition tree, validates it and
 compares its sorted source-byte digest with the expected digest. A mismatch prevents readiness.
 Definitions are immutable behind that identity; future activation and instance migration are
 recorded operations, not replacement of old bytes.
