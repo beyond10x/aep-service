@@ -5,14 +5,15 @@ description: Enforced preview boundaries, unfinished production identity and saf
 
 # Security claims stop where the evidence stops
 
-Production SSO and delegated-agent token verification are the principal unfinished trust boundary.
-The preview verifier accepts one exact bearer token from an environment variable. It refuses a
-non-loopback bind unless `--allow-insecure-dev-listener` is explicit; that flag prints a warning and
-does not make the verifier production-safe.
+Hosted human authentication resolves every bearer through Identity at an exact audience and admits
+only the configured tenant. Delegated-agent proof verification remains the principal unfinished
+trust boundary. Loopback development can use one exact bearer token from an environment variable;
+it refuses a non-loopback bind unless `--allow-insecure-dev-listener` is explicit.
 
 ## Enforced today
 
 - Request documents cannot assert actor, executor, roles, request id or received time.
+- Hosted sessions are resolved through Identity and narrowed to one configured tenant.
 - Realm/workspace admission occurs before semantic dispatch where the route provides enough scope.
 - Authority and executor remain separate facts in trusted context and audit.
 - Commands use fresh transactional state and publish no partial candidate on refusal.
@@ -24,7 +25,6 @@ does not make the verifier production-safe.
 
 ## Not yet a production claim
 
-- No trusted issuer, token audience or key-rotation integration is wired.
 - Delegated-agent owner signatures and scope intersection are ports, not deployed verification.
 - Multi-realm provisioning and policy administration are not exposed.
 - PostgreSQL TLS, pooling, backup/restore and retention policy are not production-certified.

@@ -22,6 +22,17 @@ The database URL defaults to environment variable `AEP_DATABASE_URL`; change the
 `--database-url-env`. The development token defaults to `AEP_DEV_BEARER_TOKEN`; change it with
 `--dev-token-env`.
 
+## Hosted identity
+
+| Argument | Environment | Meaning |
+|---|---|---|
+| `--identity-origin` | `AEP_IDENTITY_ORIGIN` | Exact hosted Identity origin |
+| `--identity-audience` | `AEP_IDENTITY_AUDIENCE` | Relying-party audience; defaults to `urn:b10x:aep-service` |
+| `--identity-tenant` | `AEP_IDENTITY_TENANT` | Exact tenant admitted to this authority |
+
+Origin and tenant are configured together. In hosted mode each bearer is resolved through Identity;
+the development token and its non-loopback override are not used.
+
 ## Listener and development identity
 
 | Argument | Default | Meaning |

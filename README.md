@@ -5,9 +5,9 @@ entities. Humans and agents submit semantic commands and queries; the service de
 attribution, applies authorization and protocol rules independently, and commits state, history,
 events, relations, idempotency records, and refusals atomically.
 
-This is a developer preview. The data and service boundaries are implemented, but production SSO
-and delegated-agent token verification are deliberately not: the current development verifier uses
-one exact bearer token and is loopback-only unless an operator opts into an insecure listener.
+This is a developer preview. The data and service boundaries and hosted human Identity verification
+are implemented; delegated-agent proof verification remains deliberately absent. Loopback
+development may instead use one exact bearer token.
 
 ## Where it fits
 
@@ -62,6 +62,11 @@ available only after definitions and PostgreSQL have been prepared, and the bina
 cargo run --locked -p aep-service -- probe
 cargo run --locked -p aep-service -- probe --readiness
 ```
+
+Hosted deployments configure `AEP_IDENTITY_ORIGIN` and `AEP_IDENTITY_TENANT`; the exact relying
+party audience defaults to `urn:b10x:aep-service`. The service resolves every session through
+Identity, admits only the configured tenant, and derives AEP attribution without retaining the
+credential.
 
 `--allow-insecure-dev-listener` is required to expose the development verifier beyond loopback and
 prints a warning. It is suitable only for isolated preview environments behind another trusted

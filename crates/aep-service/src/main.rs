@@ -26,7 +26,11 @@ use axum::response::Response as AxumResponse;
 use axum::routing::{any, get};
 use axum::Router;
 use clap::{Parser, Subcommand};
+use reqwest::header::{AUTHORIZATION, CACHE_CONTROL, PRAGMA};
+use serde::Deserialize;
+use sha2::{Digest as _, Sha256};
 use tokio::sync::Semaphore;
+use url::Url;
 use uuid::Uuid;
 
 const MAX_BODY_BYTES: usize = 1024 * 1024;
@@ -102,6 +106,19 @@ struct ServeArgs {
     /// Expected lowercase SHA-256 of sorted definition paths and bytes.
     #[arg(long)]
     definition_digest: String,
+    /// Identity origin for hosted authentication; omit only for loopback development.
+    #[arg(long, env = "AEP_IDENTITY_ORIGIN")]
+    identity_origin: Option<String>,
+    /// Exact Identity relying-party audience.
+    #[arg(
+        long,
+        env = "AEP_IDENTITY_AUDIENCE",
+        default_value = "urn:b10x:aep-service"
+    )]
+    identity_audience: String,
+    /// Exact Identity tenant admitted to this single-realm authority.
+    #[arg(long, env = "AEP_IDENTITY_TENANT")]
+    identity_tenant: Option<String>,
     /// Environment variable containing the exact development bearer token.
     #[arg(long, default_value = "AEP_DEV_BEARER_TOKEN")]
     dev_token_env: String,
@@ -146,8 +163,182 @@ impl CredentialVerifier for DevelopmentVerifier {
     }
 }
 
+#[derive(Clone)]
+struct IdentityVerifier {
+    client: IdentityAuthorityClient,
+    tenant: Arc<str>,
+    realm: Arc<str>,
+    workspace: Arc<str>,
+}
+
+#[derive(Clone)]
+struct IdentityAuthorityClient {
+    origin: Url,
+    audience: Arc<str>,
+    http: reqwest::Client,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct IdentityAuthority {
+    #[serde(rename = "iss")]
+    _issuer: String,
+    #[serde(rename = "sub")]
+    subject: String,
+    #[serde(rename = "aud")]
+    audience: String,
+    #[serde(rename = "exp")]
+    _expires_at: i64,
+    #[serde(rename = "email")]
+    _email: Option<String>,
+    tenant_id: String,
+    groups: Vec<String>,
+}
+
+impl IdentityAuthorityClient {
+    fn new(origin: &str, audience: &str) -> Result<Self, &'static str> {
+        let origin = Url::parse(origin).map_err(|_| "Identity origin is invalid")?;
+        let internal_http = origin.scheme() == "http"
+            && origin.host_str().is_some_and(|host| {
+                host == "127.0.0.1" || host == "localhost" || host.ends_with(".svc.cluster.local")
+            });
+        if !(origin.scheme() == "https" || internal_http)
+            || origin.host_str().is_none()
+            || !origin.username().is_empty()
+            || origin.password().is_some()
+            || origin.path() != "/"
+            || origin.query().is_some()
+            || origin.fragment().is_some()
+        {
+            return Err("Identity origin is invalid");
+        }
+        if audience.trim() != audience
+            || !(3..=256).contains(&audience.len())
+            || !audience.is_ascii()
+            || audience
+                .bytes()
+                .any(|byte| byte.is_ascii_whitespace() || byte.is_ascii_control())
+        {
+            return Err("Identity audience is invalid");
+        }
+        let http = reqwest::Client::builder()
+            .redirect(reqwest::redirect::Policy::none())
+            .connect_timeout(Duration::from_secs(3))
+            .timeout(Duration::from_secs(10))
+            .build()
+            .map_err(|_| "Identity HTTP client is unavailable")?;
+        Ok(Self {
+            origin,
+            audience: Arc::from(audience),
+            http,
+        })
+    }
+
+    async fn resolve_session(
+        &self,
+        authorization: &str,
+    ) -> Result<IdentityAuthority, AuthenticationError> {
+        let authorization = HeaderValue::from_str(authorization)
+            .map_err(|_| AuthenticationError::new("Identity session is malformed"))?;
+        let endpoint = self
+            .origin
+            .join("v1/session-authority")
+            .map_err(|_| AuthenticationError::new("Identity endpoint is invalid"))?;
+        let response = self
+            .http
+            .get(endpoint)
+            .header(AUTHORIZATION, authorization)
+            .header("x-b10x-audience", self.audience.as_ref())
+            .send()
+            .await
+            .map_err(|_| AuthenticationError::new("Identity authority is unavailable"))?;
+        let confidential = response
+            .headers()
+            .get(CACHE_CONTROL)
+            .and_then(|value| value.to_str().ok())
+            .is_some_and(|value| value.split(',').any(|part| part.trim() == "no-store"))
+            && response
+                .headers()
+                .get(PRAGMA)
+                .and_then(|value| value.to_str().ok())
+                .is_some_and(|value| value.split(',').any(|part| part.trim() == "no-cache"));
+        if !confidential {
+            return Err(AuthenticationError::new(
+                "Identity returned a cacheable credential response",
+            ));
+        }
+        if !response.status().is_success() {
+            return Err(AuthenticationError::new("Identity refused the session"));
+        }
+        let authority: IdentityAuthority = response
+            .json()
+            .await
+            .map_err(|_| AuthenticationError::new("Identity authority response is invalid"))?;
+        if authority.audience != self.audience.as_ref() {
+            return Err(AuthenticationError::new(
+                "Identity returned the wrong audience",
+            ));
+        }
+        Ok(authority)
+    }
+}
+
+impl CredentialVerifier for IdentityVerifier {
+    async fn verify(
+        &self,
+        authorization: Option<&str>,
+    ) -> Result<VerifiedPrincipal, AuthenticationError> {
+        let authorization = authorization
+            .ok_or_else(|| AuthenticationError::new("an Identity session is required"))?;
+        let authority = self
+            .client
+            .resolve_session(authorization)
+            .await
+            .map_err(|_| AuthenticationError::new("Identity refused the session"))?;
+        if authority.tenant_id != self.tenant.as_ref() {
+            return Err(AuthenticationError::new(
+                "Identity tenant is outside this AEP authority",
+            ));
+        }
+        let mut digest = Sha256::new();
+        digest.update(b"b10x/aep-service/identity-actor/v1\0");
+        digest.update(authority.tenant_id.as_bytes());
+        digest.update(b"\0");
+        digest.update(authority.subject.as_bytes());
+        let actor = format!("human:{:x}", digest.finalize());
+        Ok(VerifiedPrincipal::new(
+            actor
+                .parse()
+                .map_err(|_| AuthenticationError::new("Identity subject is invalid"))?,
+            None,
+            self.realm.as_ref(),
+            [self.workspace.to_string()],
+            authority.groups,
+            None,
+        ))
+    }
+}
+
+#[derive(Clone)]
+enum RuntimeVerifier {
+    Development(DevelopmentVerifier),
+    Identity(IdentityVerifier),
+}
+
+impl CredentialVerifier for RuntimeVerifier {
+    async fn verify(
+        &self,
+        authorization: Option<&str>,
+    ) -> Result<VerifiedPrincipal, AuthenticationError> {
+        match self {
+            Self::Development(verifier) => verifier.verify(authorization).await,
+            Self::Identity(verifier) => verifier.verify(authorization).await,
+        }
+    }
+}
+
 struct RuntimeState {
-    service: Arc<AepHttpService<DevelopmentVerifier, PostgresAuthority>>,
+    service: Arc<AepHttpService<RuntimeVerifier, PostgresAuthority>>,
     database_slots: Arc<Semaphore>,
     queue_timeout: Duration,
     request_timeout: Duration,
@@ -175,8 +366,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn serve(arguments: ServeArgs) -> Result<(), Box<dyn std::error::Error>> {
-    validate_listener(arguments.bind, arguments.allow_insecure_dev_listener)?;
-    if !arguments.bind.ip().is_loopback() {
+    let hosted = arguments.identity_origin.is_some() || arguments.identity_tenant.is_some();
+    if arguments.identity_origin.is_some() != arguments.identity_tenant.is_some() {
+        return Err("Identity origin and tenant must be configured together".into());
+    }
+    validate_listener(
+        arguments.bind,
+        hosted,
+        arguments.allow_insecure_dev_listener,
+    )?;
+    if !hosted && !arguments.bind.ip().is_loopback() {
         eprintln!(
             "WARNING: development bearer authentication is exposed on non-loopback {}",
             arguments.bind
@@ -191,21 +390,13 @@ async fn serve(arguments: ServeArgs) -> Result<(), Box<dyn std::error::Error>> {
     {
         return Err("queue, request and shutdown timeouts must be greater than zero".into());
     }
+    let verifier = runtime_verifier(&arguments)?;
     let database_url = env::var(&arguments.database_url_env).map_err(|_| {
         format!(
             "{} must contain the PostgreSQL URL",
             arguments.database_url_env
         )
     })?;
-    let raw_token = env::var(&arguments.dev_token_env).map_err(|_| {
-        format!(
-            "{} must contain the development token",
-            arguments.dev_token_env
-        )
-    })?;
-    if raw_token.trim().is_empty() {
-        return Err("the development bearer token must not be empty".into());
-    }
     let bundle =
         aep_project::load_pinned_bundle(&arguments.definitions, &arguments.definition_digest)?;
     let lifecycles = bundle.registry.lifecycles().clone();
@@ -219,18 +410,6 @@ async fn serve(arguments: ServeArgs) -> Result<(), Box<dyn std::error::Error>> {
     )
     .await
     .map_err(std::io::Error::other)?;
-    let principal = VerifiedPrincipal::new(
-        arguments.dev_authority.parse()?,
-        None,
-        arguments.realm,
-        [arguments.workspace],
-        ["developer".to_owned()],
-        None,
-    );
-    let verifier = DevelopmentVerifier {
-        authorization: Arc::from(format!("Bearer {raw_token}")),
-        principal,
-    };
     let state = Arc::new(RuntimeState {
         service: Arc::new(AepHttpService::new(verifier, authority)),
         database_slots: Arc::new(Semaphore::new(arguments.database_concurrency)),
@@ -268,6 +447,42 @@ async fn serve(arguments: ServeArgs) -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
+fn runtime_verifier(arguments: &ServeArgs) -> Result<RuntimeVerifier, Box<dyn std::error::Error>> {
+    let verifier = if let (Some(origin), Some(tenant)) = (
+        arguments.identity_origin.as_deref(),
+        arguments.identity_tenant.as_deref(),
+    ) {
+        RuntimeVerifier::Identity(IdentityVerifier {
+            client: IdentityAuthorityClient::new(origin, &arguments.identity_audience)?,
+            tenant: Arc::from(tenant),
+            realm: Arc::from(arguments.realm.as_str()),
+            workspace: Arc::from(arguments.workspace.as_str()),
+        })
+    } else {
+        let raw_token = env::var(&arguments.dev_token_env).map_err(|_| {
+            format!(
+                "{} must contain the development token",
+                arguments.dev_token_env
+            )
+        })?;
+        if raw_token.trim().is_empty() {
+            return Err("the development bearer token must not be empty".into());
+        }
+        RuntimeVerifier::Development(DevelopmentVerifier {
+            authorization: Arc::from(format!("Bearer {raw_token}")),
+            principal: VerifiedPrincipal::new(
+                arguments.dev_authority.parse()?,
+                None,
+                arguments.realm.clone(),
+                [arguments.workspace.clone()],
+                ["developer".to_owned()],
+                None,
+            ),
+        })
+    };
+    Ok(verifier)
+}
+
 async fn prepare_authority(
     database_url: String,
     realm: String,
@@ -285,8 +500,12 @@ async fn prepare_authority(
     .map_err(|_| "PostgreSQL authority preparation task failed".to_owned())?
 }
 
-fn validate_listener(bind: SocketAddr, allow_insecure: bool) -> Result<(), &'static str> {
-    if !bind.ip().is_loopback() && !allow_insecure {
+fn validate_listener(
+    bind: SocketAddr,
+    hosted: bool,
+    allow_insecure: bool,
+) -> Result<(), &'static str> {
+    if !hosted && !bind.ip().is_loopback() && !allow_insecure {
         Err("the development verifier refuses a non-loopback listener unless --allow-insecure-dev-listener is explicit")
     } else {
         Ok(())
@@ -491,6 +710,29 @@ impl IntoResponse for StatusCode {
 mod tests {
     use super::*;
 
+    async fn identity_authority(headers: axum::http::HeaderMap) -> AxumResponse {
+        assert_eq!(
+            headers
+                .get("x-b10x-audience")
+                .and_then(|value| value.to_str().ok()),
+            Some("urn:b10x:aep-service")
+        );
+        let mut response = AxumResponse::new(Body::from(
+            r#"{"iss":"https://identity.example","sub":"alice","aud":"urn:b10x:aep-service","exp":1900000000,"email":null,"tenant_id":"tenant-one","groups":["engineer"]}"#,
+        ));
+        response.headers_mut().insert(
+            header::CONTENT_TYPE,
+            HeaderValue::from_static("application/json"),
+        );
+        response
+            .headers_mut()
+            .insert(CACHE_CONTROL, HeaderValue::from_static("no-store"));
+        response
+            .headers_mut()
+            .insert(PRAGMA, HeaderValue::from_static("no-cache"));
+        response
+    }
+
     #[test]
     fn transport_request_identities_are_uuid_version_seven_values() {
         let metadata = request_metadata();
@@ -523,10 +765,15 @@ mod tests {
         assert!(!arguments.bind.ip().is_loopback());
         assert!(!arguments.allow_insecure_dev_listener);
         assert_eq!(
-            validate_listener(arguments.bind, arguments.allow_insecure_dev_listener),
+            validate_listener(
+                arguments.bind,
+                false,
+                arguments.allow_insecure_dev_listener
+            ),
             Err("the development verifier refuses a non-loopback listener unless --allow-insecure-dev-listener is explicit")
         );
-        assert_eq!(validate_listener(arguments.bind, true), Ok(()));
+        assert_eq!(validate_listener(arguments.bind, false, true), Ok(()));
+        assert_eq!(validate_listener(arguments.bind, true, false), Ok(()));
     }
 
     #[test]
@@ -539,6 +786,53 @@ mod tests {
         };
         let DefinitionsCommand::Digest { path } = arguments.command;
         assert_eq!(path, PathBuf::from("../aep"));
+    }
+
+    #[tokio::test]
+    async fn hosted_identity_derives_the_actor_and_refuses_another_tenant() {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
+            .await
+            .expect("Identity listener");
+        let address = listener.local_addr().expect("Identity address");
+        let server = tokio::spawn(async move {
+            axum::serve(
+                listener,
+                Router::new().route("/v1/session-authority", get(identity_authority)),
+            )
+            .await
+        });
+        let client =
+            IdentityAuthorityClient::new(&format!("http://{address}/"), "urn:b10x:aep-service")
+                .expect("Identity client");
+        let verifier = IdentityVerifier {
+            client: client.clone(),
+            tenant: Arc::from("tenant-one"),
+            realm: Arc::from("engineering"),
+            workspace: Arc::from("central"),
+        };
+        let principal = verifier
+            .verify(Some("Bearer synthetic-session"))
+            .await
+            .expect("verified principal");
+        assert!(principal.authority().is_human());
+        assert_ne!(principal.authority().name(), "alice");
+        assert!(principal.authorizes("engineering", "central"));
+
+        let refused = IdentityVerifier {
+            client,
+            tenant: Arc::from("another-tenant"),
+            realm: Arc::from("engineering"),
+            workspace: Arc::from("central"),
+        }
+        .verify(Some("Bearer synthetic-session"))
+        .await
+        .expect_err("cross-tenant session is refused");
+        assert_eq!(
+            refused.reason(),
+            "Identity tenant is outside this AEP authority"
+        );
+        server.abort();
+        let _ = server.await;
     }
 
     #[tokio::test]
