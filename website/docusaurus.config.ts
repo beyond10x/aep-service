@@ -1,5 +1,6 @@
 import type {Config} from '@docusaurus/types';
 import type {Options, ThemeConfig} from '@docusaurus/preset-classic';
+import docsSystemPlugin from '@beyond10x/docs-system/docusaurus';
 
 const config: Config = {
   title: 'AEP Service',
@@ -12,6 +13,7 @@ const config: Config = {
   projectName: 'aep-service',
   trailingSlash: false,
   onBrokenLinks: 'throw',
+  plugins: [docsSystemPlugin],
   onBrokenAnchors: 'throw',
   markdown: {hooks: {onBrokenMarkdownLinks: 'throw'}},
   presets: [
@@ -38,6 +40,8 @@ const config: Config = {
       hideOnScroll: true,
       logo: {alt: 'AEP Service linked authority mark', src: 'img/mark.svg'},
       items: [
+        {href: 'https://beyond10x.github.io/getting-started/', label: 'beyond10x', position: 'left'},
+        {href: 'https://beyond10x.github.io/getting-started/ecosystem', label: 'Ecosystem', position: 'left'},
         {to: '/docs/intro', label: 'Docs', position: 'left'},
         {to: '/docs/architecture', label: 'Architecture', position: 'left'},
         {to: '/api', label: 'API', position: 'left'},
