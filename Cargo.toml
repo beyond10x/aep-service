@@ -44,9 +44,13 @@ schemars = "0.8"
 # framework in AEP's wire crate; Tokio owns sockets, signals and bounded blocking work here only.
 axum = "0.8"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "signal", "sync", "time"] }
-clap = { version = "4.6", features = ["derive"] }
+clap = { version = "4.6", features = ["derive", "env"] }
 # UUIDv7 supplies sortable, collision-resistant transport attempt identities at the IO edge.
 uuid = { version = "1", features = ["v7"] }
+sha2 = "0.10"
+# Hosted Identity verification needs one bounded HTTPS client; redirects remain disabled in code.
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+url = "=2.5.4"
 
 [workspace.lints.rust]
 missing_docs = "warn"
