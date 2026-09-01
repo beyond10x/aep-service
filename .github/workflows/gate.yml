@@ -37,7 +37,7 @@ jobs:
       - uses: arduino/setup-task@b91d5d2c96a56797b48ac1e0e89220bf64044611 # v2
       - name: Install protocol
         run: |
-          cargo install --git https://github.com/beyond10x/aep --tag 0.40.0 --locked protocol-cli
+          cargo install --git https://github.com/beyond10x/aep --tag 0.40.1 --locked protocol-cli
       - name: Install cargo-deny with its own pinned toolchain
         run: |
           # Audit tooling may move faster than the service MSRV. Keep the service gate on 1.85

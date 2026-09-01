@@ -4,8 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- Pinned the service to AEP 0.40.0 at its canonical repository and removed the retired ESS-owned
-  conformance fields from AEP command handling while preserving the published HTTP contract.
+## [0.1.2] — 2026-09-01
+
+- Pinned the service to sanitized AEP 0.40.1 and Entity Runtime 0.17.4 releases at their canonical
+  repositories, and removed retired ESS-owned conformance fields while preserving the HTTP contract.
 
 ## [0.1.1] — 2026-08-31
 
