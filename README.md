@@ -95,3 +95,9 @@ tests locally. CI always supplies PostgreSQL. See [CONTRIBUTING.md](CONTRIBUTING
 
 Apache-2.0 licensed. No credential, company data, private transcript, or production configuration
 belongs in this repository.
+
+<!-- b10x-docs:start -->
+## Documentation
+
+[AEP Service documentation](https://beyond10x.github.io/docs/aep-service/) · [Start](https://beyond10x.github.io/) · [Ecosystem](https://beyond10x.github.io/ecosystem/) · [Impact](https://beyond10x.github.io/changes/) · [Releases](https://beyond10x.github.io/releases/)
+<!-- b10x-docs:end -->
