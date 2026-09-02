@@ -18,7 +18,7 @@ surfaces:
     prerequisites:
     - Rust toolchain
     - PostgreSQL
-    url: https://beyond10x.github.io/docs/aep-service/quickstart
+    url: https://beyond10x.github.io/docs/aep-service/quickstart/
   audiences:
   - evaluator
   - adopter
@@ -49,10 +49,10 @@ surfaces:
   sections:
   - kind: quickstart
     label: Quickstart
-    url: https://beyond10x.github.io/docs/aep-service/quickstart
+    url: https://beyond10x.github.io/docs/aep-service/quickstart/
   - kind: docs
     label: Architecture
-    url: https://beyond10x.github.io/docs/aep-service/architecture
+    url: https://beyond10x.github.io/docs/aep-service/architecture/
   - kind: api
     label: API reference
     url: https://beyond10x.github.io/api/aep-service/http-api/
