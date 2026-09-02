@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.5] — 2026-09-02
+
 - Added hosted Identity session verification with exact audience and tenant admission so central
   AEP queries retain server-derived human attribution without a shared development bearer.
 - Committed the deterministic OpenAPI 3.1 projection as a passive public documentation source and
