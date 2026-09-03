@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.6] — 2026-09-03
+
+- Upgrade the service to AEP 0.45.0 while retaining the current Entity Runtime 0.17.5 provider
+  contract.
+
 ## [0.1.5] — 2026-09-02
 
 - Added hosted Identity session verification with exact audience and tenant admission so central
