@@ -2,7 +2,7 @@
 format: aep.planning-md/1
 id: story:consume-aep-0-53-0
 kind: story
-status: active
+status: implemented
 title: AEP Service consumes AEP 0.53.0
 summary: Move the hosted service and its deterministic gate onto the current released AEP contract.
 relations:
@@ -24,7 +24,7 @@ scope:
   path: crates/aep-service/tests/dependency_generation.rs
 - confidence: cited
   path: website/static/openapi.json
-revision: 9
+revision: 10
 ---
 ## Outcome
 
