@@ -16,7 +16,7 @@ tasks:
       - RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --locked
       - cargo +1.85 build --workspace --locked
       - task: openapi-check
-      - aep artifact validate
+      - aep plan artifact validate
       - |
         if [ -n "${ENTITY_POSTGRES_URL:-}" ]; then
           echo "postgres-check: passed, ENTITY_POSTGRES_URL set"
