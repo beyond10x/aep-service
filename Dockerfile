@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM rust:1.85-bookworm AS build
+FROM rust:1.98-bookworm AS build
 WORKDIR /source
 # Source binds keep adopter files out of image layers; cache mounts retain Cargo work across builds.
 RUN --mount=type=bind,source=Cargo.toml,target=/source/Cargo.toml \
