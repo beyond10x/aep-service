@@ -12,8 +12,6 @@ scope:
 - confidence: cited
   path: .github/workflows/audit.yml
 - confidence: cited
-  path: .github/workflows/b10x-docs-bundle.yml
-- confidence: cited
   path: .github/workflows/gate.yml
 - confidence: cited
   path: .github/workflows/pages.yml
@@ -31,7 +29,7 @@ scope:
   path: website/package.json
 - confidence: cited
   path: website/tsconfig.json
-revision: 7
+revision: 8
 ---
 ## Goal
 
