@@ -2,7 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.1.7] — 2026-09-04
+
+- Repin the service to AEP 0.51.0. That release moved AEP's crates under area directories
+  (`crates/{govern,plan,edge}/…`) and renamed three crates the service does not pin, so all six
+  workspace dependencies move as one generation and no API adaptation was needed: the released
+  sources of `aep-client`, `aep-contract`, `aep-backend-postgres` are unchanged since 0.45.0, and
+  `aep-domain`, `aep-backend-entity` and `aep-project` changed only documentation and diagnostic
+  text. The generated OpenAPI document and the AEP-owned HTTP conformance corpus still derive from
+  the released contract and are byte-identical to the ones 0.45.0 produced.
+- Move the Entity Runtime provider pin to 0.17.6, the generation AEP 0.51.0 selects. The service
+  and the AEP backends exchange `entity-core` values, so a second Entity Runtime tag in the graph
+  would be two incompatible sets of the same types rather than a duplicate build. 0.17.6 changes
+  File Store behavior only; the PostgreSQL provider contract this service uses is unchanged.
+- Refuse a partial re-pin at the gate: a workspace test now reads `Cargo.toml` and `Cargo.lock` and
+  requires one exact AEP tag, one exact Entity Runtime tag, a lockfile resolved at both, and no
+  crate-local git pin, so a generation moved in one declaration and not the rest fails a test
+  instead of reaching a build.
 
 ## [0.1.6] — 2026-09-03
 
