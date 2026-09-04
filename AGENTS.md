@@ -26,7 +26,7 @@ The work advances governed reach (O1), decisions with evidence (O2), and attribu
 
 - `docs/VISION.md` defines the product boundary and success condition.
 - `docs/roadmap.md` orders delivery waves without duplicating status.
-- `.engineering/planning/` is the governed work record; only `aep artifact` may change it.
+- `.engineering/planning/` is the governed work record; only `aep plan artifact` may change it.
 - `CHANGELOG.md` records user- and operator-visible behavior under `Unreleased` with the change.
 
 Public documentation under `website/docs/` is a curated projection. It must not become a second
@@ -73,10 +73,10 @@ are not allowed.
 
 ## Planning store
 
-Before the first planning write in a session run `aep artifact list`. Create, relate, edit
-bodies, record evidence, and move only through `aep artifact`; never edit planning files. New
+Before the first planning write in a session run `aep plan artifact list`. Create, relate, edit
+bodies, record evidence, and move only through `aep plan artifact`; never edit planning files. New
 items remain at their initial status unless the operator explicitly requested a move. After every
-batch run `aep artifact validate` and relay its output verbatim. A CLI refusal is the result,
+batch run `aep plan artifact validate` and relay its output verbatim. A CLI refusal is the result,
 not an invitation to edit frontmatter.
 
 ## Gate
