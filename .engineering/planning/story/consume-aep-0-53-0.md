@@ -11,6 +11,8 @@ scope:
 - confidence: cited
   path: .github/workflows/gate.yml
 - confidence: cited
+  path: .github/workflows/pages.yml
+- confidence: cited
   path: CHANGELOG.md
 - confidence: cited
   path: Cargo.lock
@@ -22,7 +24,7 @@ scope:
   path: crates/aep-service/tests/dependency_generation.rs
 - confidence: cited
   path: website/static/openapi.json
-revision: 8
+revision: 9
 ---
 ## Outcome
 

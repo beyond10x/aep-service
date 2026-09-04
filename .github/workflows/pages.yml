@@ -29,4 +29,6 @@ jobs:
           cache: npm
           cache-dependency-path: website/package-lock.json
       - uses: arduino/setup-task@b91d5d2c96a56797b48ac1e0e89220bf64044611 # v2
+        with:
+          repo-token: ${{ github.token }}
       - run: task site-build
