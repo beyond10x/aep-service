@@ -10,7 +10,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 rust-version = "1.85"
 license = "Apache-2.0"
@@ -20,13 +20,13 @@ authors = ["Beyond10x"]
 [workspace.dependencies]
 # AEP owns the semantic contract and its verified wire bytes. One exact release keeps every
 # consuming crate on the same coordinated boundary (atlas ADR 0011 and ADR 0012).
-aep-client = { git = "https://github.com/beyond10x/aep", tag = "0.51.0" }
-aep-backend-entity = { git = "https://github.com/beyond10x/aep", tag = "0.51.0" }
-aep-backend-postgres = { git = "https://github.com/beyond10x/aep", tag = "0.51.0" }
-aep-contract = { git = "https://github.com/beyond10x/aep", tag = "0.51.0" }
-aep-domain = { git = "https://github.com/beyond10x/aep", tag = "0.51.0" }
-aep-project = { git = "https://github.com/beyond10x/aep", tag = "0.51.0" }
-# The service uses the same released provider AEP 0.51.0 selects. Declaring the pin
+aep-client = { git = "https://github.com/beyond10x/aep", tag = "0.53.0" }
+aep-backend-entity = { git = "https://github.com/beyond10x/aep", tag = "0.53.0" }
+aep-backend-postgres = { git = "https://github.com/beyond10x/aep", tag = "0.53.0" }
+aep-contract = { git = "https://github.com/beyond10x/aep", tag = "0.53.0" }
+aep-domain = { git = "https://github.com/beyond10x/aep", tag = "0.53.0" }
+aep-project = { git = "https://github.com/beyond10x/aep", tag = "0.53.0" }
+# The service uses the same released provider AEP 0.53.0 selects. Declaring the pin
 # once here prevents a crate-local ER selection from introducing a second provider generation.
 entity-postgres = { git = "https://github.com/beyond10x/entity-runtime", tag = "0.17.6" }
 entity-core = { git = "https://github.com/beyond10x/entity-runtime", tag = "0.17.6" }

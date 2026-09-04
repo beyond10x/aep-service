@@ -39,16 +39,18 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
-            ~/.cargo/bin/aep
-            ~/.cargo/bin/protocol
+            ${{ runner.temp }}/specification-tools/bin/aep
+            ${{ runner.temp }}/specification-tools/bin/protocol
             ~/.cargo/bin/cargo-deny
-          key: ${{ runner.os }}-${{ runner.arch }}-gate-tools-aep-0.52.0-cargo-deny-0.20.2-v1
+          key: ${{ runner.os }}-${{ runner.arch }}-gate-tools-aep-0.53.0-cargo-deny-0.20.2-v2
       - name: Install protocol
         run: |
-          if [ "$(aep --version 2>/dev/null || true)" != "protocol 0.52.0" ] || \
-             [ "$(protocol --version 2>/dev/null || true)" != "protocol 0.52.0" ]; then
-            cargo install --force --git https://github.com/beyond10x/aep --tag 0.52.0 --locked aep-cli
+          tool_root="$RUNNER_TEMP/specification-tools"
+          if [ "$("$tool_root/bin/aep" --version 2>/dev/null || true)" != "protocol 0.53.0" ] || \
+             [ "$("$tool_root/bin/protocol" --version 2>/dev/null || true)" != "protocol 0.53.0" ]; then
+            cargo install --root "$tool_root" --git https://github.com/beyond10x/aep --tag 0.53.0 --locked aep-cli
           fi
+          echo "$tool_root/bin" >> "$GITHUB_PATH"
       - name: Install cargo-deny with its own pinned toolchain
         run: |
           # Audit tooling may move faster than the service MSRV. Keep the service gate on 1.85
