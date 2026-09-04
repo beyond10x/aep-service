@@ -2,7 +2,7 @@
 format: aep.planning-md/1
 id: story:refresh-compatible-dependencies
 kind: story
-status: active
+status: implemented
 title: Refresh compatible service and website dependencies
 summary: Upgrade the supported build, release, schema, and website dependency set together.
 relations:
@@ -31,7 +31,7 @@ scope:
   path: website/package.json
 - confidence: cited
   path: website/tsconfig.json
-revision: 6
+revision: 7
 ---
 ## Goal
 
