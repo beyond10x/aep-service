@@ -3171,7 +3171,7 @@
   "info": {
     "description": "Authenticated semantic commands and queries for Agentic Engineering Protocol entities. PostgreSQL and Entity Runtime provider operations are not public APIs.",
     "title": "AEP Service API",
-    "version": "0.1.7"
+    "version": "0.1.8"
   },
   "openapi": "3.1.0",
   "paths": {

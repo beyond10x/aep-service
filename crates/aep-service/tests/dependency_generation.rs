@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 
 /// The released AEP tag this service consumes. A re-pin moves this constant and `Cargo.toml`
 /// together; the tests below refuse the state where only one of them moved.
-const AEP_TAG: &str = "0.51.0";
+const AEP_TAG: &str = "0.53.0";
 
 /// The Entity Runtime tag AEP `AEP_TAG` selects. The service and the AEP backends exchange
 /// `entity-core` types, so a second Entity Runtime generation in the graph is not a duplicate

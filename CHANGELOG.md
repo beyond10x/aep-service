@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.8] — 2026-09-04
+
+- Consume AEP 0.53.0 as one coordinated dependency generation, including the current grouped
+  `aep plan artifact` command surface and relation-removal correctness fixes, while preserving the
+  service's existing HTTP contract.
+- Install the pinned AEP CLI into a run-local CI root so a cached global binary from an older
+  release cannot block or contaminate the service gate.
+- Package the definition tree from the exact Cargo-locked AEP revision in the standalone image so
+  hosted deployments can pin and load `/definitions` without a second source checkout.
+
 ## [0.1.7] — 2026-09-04
 
 - Repin the service to AEP 0.51.0. That release moved AEP's crates under area directories
