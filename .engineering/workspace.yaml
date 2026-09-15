@@ -1,0 +1,27 @@
+# The repositories one `aep` command answers across.
+#
+# A project file (`project.yaml`, beside this one) says what *this* repository runs under. This file
+# says which repositories a question should be answered over — so the organization objectives this
+# repository serves can be read from the repository that owns them, rather than copied into a local
+# mirror that drifts the moment the owner edits it.
+#
+# `source` takes the same locator `project.yaml`'s `protocols:` does: a path relative to this
+# directory, or a **pinned** `git+ssh://`, `git+https://` or `git+file://` revision. An absolute path
+# is refused because it is true on one machine and false in CI, and an unpinned repository is a
+# dependency whose meaning changes with no commit in this one.
+#
+# A member nobody has checked out is a normal condition, not a broken workspace.
+version: aep.workspace/1
+
+members:
+  # This repository. Named explicitly rather than implied, so every artifact in the assembled graph
+  # carries a member and none of them is the special one that does not.
+  - name: aep-service
+    source: ..
+
+  # The organization's plan of record. `atlas` owns the objectives O1–O6 in its `ROADMAP.md` and in
+  # `atlas/vision:O1`…`atlas/vision:O6`; this repository holds none of its own. The six local
+  # `vision:O1`–`O6` documents were projections of those rows, kept in step by hand, and are archived
+  # — atlas is the authority, and it is named here rather than copied.
+  - name: atlas
+    source: ../../atlas
