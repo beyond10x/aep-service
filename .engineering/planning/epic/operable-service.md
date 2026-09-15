@@ -2,14 +2,14 @@
 format: aep.planning-md/1
 id: epic:operable-service
 kind: epic
-status: draft
+status: active
 title: An operable service rather than a library demo
 summary: Compose, deploy, observe, back up and restore the central service without exposing data or database authority.
 relations:
 - decomposes: initiative:central-aep-authority
 - serves: vision:O1
 - serves: vision:O6
-revision: 1
+revision: 3
 ---
 # Epic: An operable service rather than a library demo
 

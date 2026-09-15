@@ -14,7 +14,7 @@ services:
       - aep-preview-postgres:/var/lib/postgresql/data
 
   aep-service:
-    image: ghcr.io/beyond10x/aep-service:${AEP_SERVICE_VERSION:-0.1.1}
+    image: ghcr.io/beyond10x/aep-service:${AEP_SERVICE_VERSION:-0.1.8}
     depends_on:
       postgres:
         condition: service_healthy

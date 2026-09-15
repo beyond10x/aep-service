@@ -2,14 +2,14 @@
 format: aep.planning-md/1
 id: epic:application-service-boundary
 kind: epic
-status: proposed
+status: active
 title: The authenticated AEP application boundary
 summary: Implement the EP-owned command/query wire without exposing a raw Entity Runtime store.
 relations:
 - decomposes: initiative:central-aep-authority
 - serves: vision:O1
 - serves: vision:O2
-revision: 2
+revision: 3
 ---
 # Epic: The authenticated AEP application boundary
 

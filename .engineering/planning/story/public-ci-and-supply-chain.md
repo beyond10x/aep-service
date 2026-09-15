@@ -2,14 +2,14 @@
 format: aep.planning-md/1
 id: story:public-ci-and-supply-chain
 kind: story
-status: draft
+status: implemented
 title: Make the public gate and supply chain visible
 summary: Run the real PostgreSQL gate, contract drift, MSRV, site and dependency policy in public automation.
 relations:
 - decomposes: epic:public-developer-preview
 - serves: vision:O1
 - serves: vision:O6
-revision: 1
+revision: 4
 ---
 ## Context
 

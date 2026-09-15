@@ -87,7 +87,8 @@ These are boundaries inside one deployable service, not a microservice decomposi
 
 ## Development
 
-Rust 1.85 or newer, `go-task`, `protocol`, and Node.js 20 are required for the complete gate.
+Rust 1.85 or newer, `go-task`, `aep` — whose `protocol` alias installs from the same crate — and
+Node.js 20 are required for the complete gate.
 
 ```console
 task check

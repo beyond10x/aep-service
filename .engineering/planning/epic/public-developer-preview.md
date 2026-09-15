@@ -2,7 +2,7 @@
 format: aep.planning-md/1
 id: epic:public-developer-preview
 kind: epic
-status: draft
+status: active
 title: A credible public developer preview
 summary: Publish a self-contained, inspectable and locally runnable service without claiming production authentication.
 relations:
@@ -10,7 +10,7 @@ relations:
 - serves: vision:O1
 - serves: vision:O2
 - serves: vision:O6
-revision: 1
+revision: 3
 ---
 ## Outcome
 
