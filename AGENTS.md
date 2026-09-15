@@ -96,9 +96,15 @@ to `Taskfile.yml` and CI together so pull requests and releases cannot exercise 
 ## Branch protection
 
 `main` carries the active ruleset `main: checks before merge` (id `21939350`). The `gate` and
-`site` checks are required, and deletion and non-fast-forward updates are forbidden. Delivery
-credentials and privileged publication procedures are private Atlas concerns and do not belong in
-this public repository. If a job name changes, update the ruleset in the same operation; an
+`site` checks are required, and deletion and non-fast-forward updates are forbidden. After the
+ruleset change of 2026-09-15 the repository `admin` role (`RepositoryRole` 5) is the only bypass
+actor: the b10x-bot Integration no longer bypasses, so the bot's own pushes and merges are held to
+the same `gate` and `site` results as anyone else's, and a direct push to `main` lands only when the
+pushed commit already carries both at `success` — the shape substrate's ruleset
+`main-requires-the-full-gate` (id `23425552`) uses. Before that change the Integration held
+`bypass_mode: always`, which is how `250567f` reached `main` on 2026-09-15 with `gate` at `failure`.
+Delivery credentials and privileged publication procedures are private Atlas concerns and do not
+belong in this public repository. If a job name changes, update the ruleset in the same operation; an
 obsolete required context blocks every pull request without protecting anything.
 
 ## Implementation conventions
