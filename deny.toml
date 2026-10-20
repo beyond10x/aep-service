@@ -4,6 +4,9 @@ all-features = true
 [advisories]
 version = 2
 yanked = "deny"
+ignore = [
+  { id = "RUSTSEC-2024-0449", reason = "unmaintained, no fixed version; reached through serde_yaml 0.9 pinned by aep (aep Cargo.toml:59); remove when aep replaces serde_yaml" },
+]
 
 [licenses]
 version = 2
