@@ -549,8 +549,8 @@ mod tests {
     #[test]
     fn percent_decoding_is_strict_and_preserves_opaque_utf8_coordinates() {
         assert_eq!(
-            decode_segment("company%20brain"),
-            Ok("company brain".to_owned())
+            decode_segment("knowledge%20store"),
+            Ok("knowledge store".to_owned())
         );
         assert_eq!(
             decode_segment("aep.design%2Fv1"),

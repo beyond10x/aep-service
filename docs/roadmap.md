@@ -68,8 +68,8 @@ Work: the remaining stories in `epic:projections-and-adoption` and `epic:operabl
 
 ## Deliberately later
 
-Company-brain entities may use the same hosting platform only after access control and projection
-isolation are proven. They get a separate definition bundle and storage realm; they are not folded
-into the planning model for graph convenience. A tenant may own both realms, but common ownership
-grants no cross-realm read, relation or command path; tenant billing and realm provisioning remain
-control-plane concerns outside the AEP wire.
+Entities of an organisation's knowledge store may use the same hosting platform only after access
+control and projection isolation are proven. They get a separate definition bundle and storage
+realm; they are not folded into the planning model for graph convenience. A tenant may own both
+realms, but common ownership grants no cross-realm read, relation or command path; tenant billing
+and realm provisioning remain control-plane concerns outside the AEP wire.
